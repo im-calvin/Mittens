@@ -1,0 +1,30 @@
+{
+  "name": "mittens",
+  "version": "2.0.0",
+  "description": "",
+  "main": "src/bot.ts",
+  "scripts": {
+    "start": "ts-node --esm src/bot.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/im-calvin/Mittens.git"
+  },
+  "author": "Calvin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/im-calvin/Mittens/issues"
+  },
+  "homepage": "https://github.com/im-calvin/Mittens#readme",
+  "dependencies": {
+    "@sentry/node": "^7.50.0",
+    "discord.js": "^14.9.0",
+    "dotenv": "^16.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^18.16.3",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4"
+  },
+  "type": "module"
+}

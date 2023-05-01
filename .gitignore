@@ -129,6 +129,10 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-.env.me
+# env vars
 googleOAuth2.json
-googleServiceacc.json
+googleServiceAcc.json
+.env*
+.flaskenv*
+!.env.project
+!.env.vault

@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "CommonJS",
+    "module": "ESNext",
     "rootDir": "./src/",
     "outDir": "./dist/",
     "strict": true,
@@ -15,8 +15,10 @@
     "forceConsistentCasingInFileNames": true,
     "removeComments": true,
     "typeRoots": ["node_modules/@types"],
+    "types": ["node"],
     "sourceMap": false,
-    "baseUrl": "./"
+    "baseUrl": "./",
+    "allowImportingTsExtensions": true
   },
   "files": ["src/Bot.ts"],
   "include": ["./**/*.ts"],
