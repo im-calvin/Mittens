@@ -7,11 +7,9 @@ import {
   Message,
 } from "discord.js";
 import MittensClient from "./utils/Client.js";
-import dotenv from "dotenv";
-import * as Sentry from "@sentry/node";
-import { CommandData } from "./utils/cmdLoader.js";
-
-dotenv.config();
+import { handleTranslate } from "./translate/Translate.js";
+import Sentry from "@sentry/node";
+import { readEnv } from "./utils/env.js";
 
 // Sentry.init({
 //   dsn: "https://c9c992d5a347411db99537a0ed2c0094@o4505106964742144.ingest.sentry.io/4505106967691264",
@@ -22,7 +20,13 @@ dotenv.config();
 //   tracesSampleRate: 1.0,
 // });
 
-const client = new MittensClient({ intents: [GatewayIntentBits.Guilds] });
+const client = new MittensClient({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMessages,
+  ],
+});
 
 // on boot
 client.once("ready", () => {
@@ -50,8 +54,9 @@ client.on(Events.InteractionCreate, async (interaction: BaseInteraction) => {
 });
 
 // handle translating
-client.on("messageCreate", (message: Message) => {
-  console.log(message);
+client.on("messageCreate", async (message: Message) => {
+  if (message.author.id === client.user!.id) return;
+  await handleTranslate(message);
 });
 
-client.login(process.env.DISCORD_TOKEN as string);
+client.login(readEnv("DISCORD_TOKEN"));

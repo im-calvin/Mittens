@@ -4,7 +4,8 @@
   "description": "",
   "main": "src/bot.ts",
   "scripts": {
-    "start": "ts-node-esm src/bot.ts"
+    "start": "ts-node --esm src/bot.ts",
+    "translate": "ts-node --esm src/translate/Translate.ts"
   },
   "repository": {
     "type": "git",
@@ -19,7 +20,7 @@
   "dependencies": {
     "@sentry/node": "^7.50.0",
     "discord.js": "^14.9.0",
-    "dotenv": "^16.0.3"
+    "dotenv-vault-core": "^0.7.0"
   },
   "devDependencies": {
     "@types/node": "^18.16.3",
