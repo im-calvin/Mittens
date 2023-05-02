@@ -5,7 +5,7 @@
     "rootDir": "./src/",
     "outDir": "./dist/",
     "strict": true,
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext",
     "importHelpers": true,
     "experimentalDecorators": true,
     "esModuleInterop": true,
@@ -17,10 +17,9 @@
     "typeRoots": ["node_modules/@types"],
     "types": ["node"],
     "sourceMap": false,
-    "baseUrl": "./",
-    "allowImportingTsExtensions": true
+    "baseUrl": "./"
   },
-  "files": ["src/Bot.ts"],
+  "files": ["src/bot.ts"],
   "include": ["./**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

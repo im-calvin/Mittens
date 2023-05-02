@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/bot.ts",
   "scripts": {
-    "start": "ts-node --esm src/bot.ts"
+    "start": "ts-node-esm src/bot.ts"
   },
   "repository": {
     "type": "git",

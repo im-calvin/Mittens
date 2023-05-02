@@ -1,5 +1,5 @@
-import { REST, GatewayIntentBits, Events } from "discord.js";
-import MittensClient from "./utils/Client"; // TODO "allowImportingtsExtensions"
+import { REST, GatewayIntentBits, Events, Routes } from "discord.js";
+import MittensClient from "./utils/Client.js"; // TODO "allowImportingtsExtensions"
 import dotenv from "dotenv";
 import * as Sentry from "@sentry/node";
 
@@ -15,23 +15,39 @@ dotenv.config();
 // });
 
 const client = new MittensClient({ intents: [GatewayIntentBits.Guilds] });
-client.loadCommands();
 
 // on boot
 client.once("ready", () => {
   console.log("もしもし");
 });
 
-// on interaction
-client.on(Events.InteractionCreate, (interaction) => {
-  if (interaction.isChatInputCommand()) {
-    // handle translation
+// handle slash commands
+client.on(Events.InteractionCreate, async (interaction) => {
+  if (!interaction.isChatInputCommand()) return; // not a slash command
+
+  const command = client.commands.get(interaction.commandName);
+
+  if (!command) {
+    console.error(`No command matching ${interaction.commandName} was found.`);
     return;
   }
-  // handle slash commands
-  console.log(interaction);
+
+  try {
+    await command.execute(interaction);
+  } catch (error) {
+    console.error(error);
+    if (interaction.replied || interaction.deferred) {
+      await interaction.followUp({
+        content: "There was an error while executing this command!",
+        ephemeral: true,
+      });
+    } else {
+      await interaction.reply({
+        content: "There was an error while executing this command!",
+        ephemeral: true,
+      });
+    }
+  }
 });
 
-// register the commands
-const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN as string);
 client.login(process.env.DISCORD_TOKEN as string);
