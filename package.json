@@ -4,6 +4,7 @@
   "description": "",
   "main": "src/bot.ts",
   "scripts": {
+    "clean": "rimraf ./dist",
     "start": "ts-node --esm src/bot.ts",
     "translate": "ts-node --esm src/translate/Translate.ts"
   },

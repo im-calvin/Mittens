@@ -1,8 +1,6 @@
 import {
-  REST,
   GatewayIntentBits,
   Events,
-  Routes,
   BaseInteraction,
   Message,
 } from "discord.js";

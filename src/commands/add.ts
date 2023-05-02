@@ -1,8 +1,4 @@
-import {
-  SlashCommandBuilder,
-  Interaction,
-  ChatInputCommandInteraction,
-} from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
 import { CommandData } from "src/utils/cmdLoader.js";
 
 const add: CommandData = {

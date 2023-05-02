@@ -1,14 +1,4 @@
-import {
-  Client,
-  ClientOptions,
-  Collection,
-  REST,
-  Routes,
-  SlashCommandBuilder,
-} from "discord.js";
-import { readdirSync } from "fs";
-import { dirname, join, resolve } from "path";
-import { fileURLToPath, pathToFileURL } from "url";
+import { Client, ClientOptions, Collection, REST, Routes } from "discord.js";
 import { CommandData, commands } from "./cmdLoader.js";
 import { readEnv } from "./env.js";
 
