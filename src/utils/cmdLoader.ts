@@ -1,3 +1,9 @@
-import { addCmd } from "src/commands/add.js";
+import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js";
+import add from "../commands/add.js";
 
-export const commands = [addCmd.toJSON()];
+export interface CommandData {
+  command: SlashCommandBuilder;
+  execute: (interaction: ChatInputCommandInteraction) => void | Promise<void>;
+}
+
+export const commands: CommandData[] = [add];

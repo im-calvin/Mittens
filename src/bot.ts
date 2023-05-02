@@ -1,7 +1,15 @@
-import { REST, GatewayIntentBits, Events, Routes } from "discord.js";
-import MittensClient from "./utils/Client.js"; // TODO "allowImportingtsExtensions"
+import {
+  REST,
+  GatewayIntentBits,
+  Events,
+  Routes,
+  BaseInteraction,
+  Message,
+} from "discord.js";
+import MittensClient from "./utils/Client.js";
 import dotenv from "dotenv";
 import * as Sentry from "@sentry/node";
+import { CommandData } from "./utils/cmdLoader.js";
 
 dotenv.config();
 
@@ -22,9 +30,10 @@ client.once("ready", () => {
 });
 
 // handle slash commands
-client.on(Events.InteractionCreate, async (interaction) => {
+client.on(Events.InteractionCreate, async (interaction: BaseInteraction) => {
   if (!interaction.isChatInputCommand()) return; // not a slash command
 
+  // handle commands
   const command = client.commands.get(interaction.commandName);
 
   if (!command) {
@@ -35,19 +44,14 @@ client.on(Events.InteractionCreate, async (interaction) => {
   try {
     await command.execute(interaction);
   } catch (error) {
+    console.error(`Error executing ${interaction.commandName}`);
     console.error(error);
-    if (interaction.replied || interaction.deferred) {
-      await interaction.followUp({
-        content: "There was an error while executing this command!",
-        ephemeral: true,
-      });
-    } else {
-      await interaction.reply({
-        content: "There was an error while executing this command!",
-        ephemeral: true,
-      });
-    }
   }
+});
+
+// handle translating
+client.on("messageCreate", (message: Message) => {
+  console.log(message);
 });
 
 client.login(process.env.DISCORD_TOKEN as string);

@@ -9,28 +9,29 @@ import {
 import { readdirSync } from "fs";
 import { dirname, join, resolve } from "path";
 import { fileURLToPath, pathToFileURL } from "url";
-import { commands } from "./cmdLoader.js";
+import { CommandData, commands } from "./cmdLoader.js";
 
-interface command {
-  data: SlashCommandBuilder;
-  execute: Function;
-}
-
+// 何これ、要らんね
+// まぁ、わかるけど
 export default class MittensClient extends Client {
-  /* "add": Object {data: SlashCommand, execute: function} */
   #rest: REST = new REST().setToken(process.env.DISCORD_TOKEN as string);
+  /* "add": CommandData {data: SlashCommand, execute: function} */
+  commands = new Collection<string, CommandData>();
   constructor(options: ClientOptions) {
     super(options);
+    commands.forEach((c) => this.addToCollection(c));
     this.loadCommands();
   }
+
+  addToCollection(listener: CommandData) {
+    this.commands.set(listener.command.name, listener);
+  }
+
   async loadCommands() {
     // register all the commands
-    
-    
     await this.#rest.put(
       Routes.applicationCommands(process.env.DISCORD_CLIENT_ID as string),
-      { body: commands }
+      { body: this.commands.map((c) => c.command.toJSON()) }
     );
-
   }
 }
