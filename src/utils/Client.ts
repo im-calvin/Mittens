@@ -2,8 +2,6 @@ import { Client, ClientOptions, Collection, REST, Routes } from "discord.js";
 import { CommandData, commands } from "./cmdLoader.js";
 import { readEnv } from "./env.js";
 
-// 何これ、要らんね
-// まぁ、わかるけど
 export default class MittensClient extends Client {
   #rest: REST = new REST().setToken(readEnv("DISCORD_TOKEN"));
   /* "add": CommandData {data: SlashCommand, execute: function} */
@@ -18,8 +16,8 @@ export default class MittensClient extends Client {
     this.commands.set(listener.command.name, listener);
   }
 
+  // register all the commands
   async loadCommands() {
-    // register all the commands
     await this.#rest.put(Routes.applicationCommands(readEnv("DISCORD_CLIENT_ID")), {
       body: this.commands.map((c) => c.command.toJSON()),
     });
