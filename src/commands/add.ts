@@ -1,14 +1,13 @@
-import {
-  SlashCommandBuilder,
-  Interaction,
-  ChatInputCommandInteraction,
-} from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
+import { CommandData } from "src/utils/cmdLoader.js";
 
-module.exports = {
-  data: new SlashCommandBuilder()
+const add: CommandData = {
+  command: new SlashCommandBuilder()
     .setName("add")
     .setDescription("Adds a user to your subscription list in your current channel."),
-  async execute(interaction: ChatInputCommandInteraction) {
+  execute: async (interaction) => {
     await interaction.reply("Successfully added a user!");
   },
 };
+
+export default add;

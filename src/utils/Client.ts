@@ -1,32 +1,25 @@
-import { Client, ClientOptions, Collection } from "discord.js";
-import { readdirSync } from "fs";
-import { dirname, join, resolve } from "path";
-import { fileURLToPath } from "url";
+import { Client, ClientOptions, Collection, REST, Routes } from "discord.js";
+import { CommandData, commands } from "./cmdLoader.js";
+import { readEnv } from "./env.js";
 
 export default class MittensClient extends Client {
-  commands: Collection<string, string>; // use correct type :)
+  #rest: REST = new REST().setToken(readEnv("DISCORD_TOKEN"));
+  /* "add": CommandData {data: SlashCommand, execute: function} */
+  commands = new Collection<string, CommandData>();
   constructor(options: ClientOptions) {
     super(options);
-    this.commands = new Collection();
+    commands.forEach((c) => this.addToCollection(c));
     this.loadCommands();
   }
-  loadCommands() {
-    const __dirname = dirname(fileURLToPath(import.meta.url));
-    const commandsPath = join(__dirname, "commands"); // call this from "src/"
-    const commandFiles = readdirSync(commandsPath);
-    commandFiles.filter((file) => file.endsWith("ts"));
 
-    for (const file of commandFiles) {
-      const filePath = join(commandsPath, file);
-      const command = require(filePath);
-      // Set a new item in the Collection with the key as the command name and the value as the exported module
-      if ("data" in command && "execute" in command) {
-        this.commands.set(command.data.name, command);
-      } else {
-        console.log(
-          `[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`
-        );
-      }
-    }
+  addToCollection(listener: CommandData) {
+    this.commands.set(listener.command.name, listener);
+  }
+
+  // register all the commands
+  async loadCommands() {
+    await this.#rest.put(Routes.applicationCommands(readEnv("DISCORD_CLIENT_ID")), {
+      body: this.commands.map((c) => c.command.toJSON()),
+    });
   }
 }

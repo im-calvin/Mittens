@@ -1,46 +1,73 @@
-import {
-  Collection,
-  REST,
-  Routes,
-  Client,
-  GatewayIntentBits,
-  Events,
-  BaseInteraction,
-  ChatInputCommandInteraction,
-} from "discord.js";
-import MittensClient from "./utils/Client.ts"; // TODO "allowImportingtsExtensions"
-import dotenv from "dotenv";
-import * as Sentry from "@sentry/node";
+import { GatewayIntentBits, Events, BaseInteraction, Message } from "discord.js";
+import MittensClient from "./utils/Client.js";
+import { handleTranslate } from "./translate/Translate.js";
+import Sentry from "@sentry/node";
+import { readEnv } from "./utils/env.js";
+import { ProfilingIntegration } from "@sentry/profiling-node";
 
-dotenv.config();
+Sentry.init({
+  dsn: "https://c9c992d5a347411db99537a0ed2c0094@o4505106964742144.ingest.sentry.io/4505106967691264",
+  integrations: [
+    new ProfilingIntegration(),
+    new Sentry.Integrations.Http({ tracing: true }),
+    ...Sentry.autoDiscoverNodePerformanceMonitoringIntegrations(),
+  ],
+  tracesSampleRate: 1.0,
+  profilesSampleRate: 1.0,
+});
 
-// Sentry.init({
-//   dsn: "https://c9c992d5a347411db99537a0ed2c0094@o4505106964742144.ingest.sentry.io/4505106967691264",
+const boot = Sentry.startTransaction({
+  op: "boot",
+  name: "First time launch of Mittens",
+});
 
-//   // Set tracesSampleRate to 1.0 to capture 100%
-//   // of transactions for performance monitoring.
-//   // We recommend adjusting this value in production
-//   tracesSampleRate: 1.0,
-// });
-
-const client = new MittensClient({ intents: [GatewayIntentBits.Guilds] });
-client.loadCommands();
+const client = new MittensClient({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMessages,
+  ],
+});
 
 // on boot
 client.once("ready", () => {
   console.log("もしもし");
 });
 
-// on interaction
-client.on(Events.InteractionCreate, (interaction) => {
-  if (interaction.isChatInputCommand()) {
-    // handle translation
+// handle slash commands
+client.on(Events.InteractionCreate, async (interaction: BaseInteraction) => {
+  if (!interaction.isChatInputCommand()) return; // not a slash command
+  const transaction = Sentry.startTransaction({
+    op: "slash",
+    name: "Slash command interaction",
+  });
+
+  // handle commands
+  const command = client.commands.get(interaction.commandName);
+
+  if (!command) {
+    console.error(`No command matching ${interaction.commandName} was found.`);
     return;
   }
-  // handle slash commands
-  console.log(interaction);
+
+  try {
+    await command.execute(interaction);
+  } catch (error) {
+    console.error(`Error executing ${interaction.commandName}`);
+    console.error(error);
+  }
+  transaction.finish();
 });
 
-// register the commands
-const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN as string);
-client.login(process.env.DISCORD_TOKEN as string);
+// handle translating
+client.on("messageCreate", async (message: Message) => {
+  const transaction = Sentry.startTransaction({
+    op: "msgCreate",
+    name: "Message creation interaction",
+  });
+  if (message.author.id === client.user!.id) return;
+  await handleTranslate(message);
+});
+
+client.login(readEnv("DISCORD_TOKEN"));
+boot.finish();

@@ -2,10 +2,9 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "rootDir": "./src/",
-    "outDir": "./dist/",
+    "outDir": "./dist",
     "strict": true,
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext",
     "importHelpers": true,
     "experimentalDecorators": true,
     "esModuleInterop": true,
@@ -14,13 +13,11 @@
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
     "removeComments": true,
-    "typeRoots": ["node_modules/@types"],
     "types": ["node"],
     "sourceMap": false,
-    "baseUrl": "./",
-    "allowImportingTsExtensions": true
+    "baseUrl": "./"
   },
-  "files": ["src/Bot.ts"],
-  "include": ["./**/*.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["./**/*.ts", "types/*.d.ts"],
+  "exclude": ["node_modules", "dist"],
+  "ts-node": { "files": true }
 }

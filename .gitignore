@@ -131,7 +131,7 @@ dist
 
 # env vars
 googleOAuth2.json
-googleServiceAcc.json
+GOOGLE_APPLICATION_CREDENTIALS.json
 .env*
 .flaskenv*
 !.env.project
