@@ -1,22 +1,25 @@
-import {
-  GatewayIntentBits,
-  Events,
-  BaseInteraction,
-  Message,
-} from "discord.js";
+import { GatewayIntentBits, Events, BaseInteraction, Message } from "discord.js";
 import MittensClient from "./utils/Client.js";
 import { handleTranslate } from "./translate/Translate.js";
 import Sentry from "@sentry/node";
 import { readEnv } from "./utils/env.js";
+import { ProfilingIntegration } from "@sentry/profiling-node";
 
-// Sentry.init({
-//   dsn: "https://c9c992d5a347411db99537a0ed2c0094@o4505106964742144.ingest.sentry.io/4505106967691264",
+Sentry.init({
+  dsn: "https://c9c992d5a347411db99537a0ed2c0094@o4505106964742144.ingest.sentry.io/4505106967691264",
+  integrations: [
+    new ProfilingIntegration(),
+    new Sentry.Integrations.Http({ tracing: true }),
+    ...Sentry.autoDiscoverNodePerformanceMonitoringIntegrations(),
+  ],
+  tracesSampleRate: 1.0,
+  profilesSampleRate: 1.0,
+});
 
-//   // Set tracesSampleRate to 1.0 to capture 100%
-//   // of transactions for performance monitoring.
-//   // We recommend adjusting this value in production
-//   tracesSampleRate: 1.0,
-// });
+const boot = Sentry.startTransaction({
+  op: "boot",
+  name: "First time launch of Mittens",
+});
 
 const client = new MittensClient({
   intents: [
@@ -34,6 +37,10 @@ client.once("ready", () => {
 // handle slash commands
 client.on(Events.InteractionCreate, async (interaction: BaseInteraction) => {
   if (!interaction.isChatInputCommand()) return; // not a slash command
+  const transaction = Sentry.startTransaction({
+    op: "slash",
+    name: "Slash command interaction",
+  });
 
   // handle commands
   const command = client.commands.get(interaction.commandName);
@@ -49,12 +56,18 @@ client.on(Events.InteractionCreate, async (interaction: BaseInteraction) => {
     console.error(`Error executing ${interaction.commandName}`);
     console.error(error);
   }
+  transaction.finish();
 });
 
 // handle translating
 client.on("messageCreate", async (message: Message) => {
+  const transaction = Sentry.startTransaction({
+    op: "msgCreate",
+    name: "Message creation interaction",
+  });
   if (message.author.id === client.user!.id) return;
   await handleTranslate(message);
 });
 
 client.login(readEnv("DISCORD_TOKEN"));
+boot.finish();

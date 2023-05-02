@@ -19,7 +19,9 @@
   },
   "homepage": "https://github.com/im-calvin/Mittens#readme",
   "dependencies": {
+    "@google-cloud/translate": "^7.2.1",
     "@sentry/node": "^7.50.0",
+    "@sentry/profiling-node": "^0.3.0",
     "discord.js": "^14.9.0",
     "dotenv-vault-core": "^0.7.0"
   },
