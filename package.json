@@ -4,9 +4,11 @@
   "description": "",
   "main": "src/bot.ts",
   "scripts": {
-    "clean": "rimraf ./dist",
+    "clean": "rimraf ./dist database.sqlite",
     "start": "ts-node --esm src/bot.ts",
-    "translate": "ts-node --esm src/translate/Translate.ts"
+    "translate": "ts-node --esm src/translate/Translate.ts",
+    "typeorm": "typeorm-ts-node-commonjs",
+    "setup": "npm run clean && ts-node --esm src/db/setup.ts"
   },
   "repository": {
     "type": "git",
@@ -23,7 +25,10 @@
     "@sentry/node": "^7.50.0",
     "@sentry/profiling-node": "^0.3.0",
     "discord.js": "^14.9.0",
-    "dotenv-vault-core": "^0.7.0"
+    "dotenv-vault-core": "^0.7.0",
+    "reflect-metadata": "^0.1.13",
+    "sqlite3": "^5.1.6",
+    "typeorm": "^0.3.15"
   },
   "devDependencies": {
     "@types/node": "^18.16.3",

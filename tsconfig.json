@@ -6,6 +6,7 @@
     "strict": true,
     "moduleResolution": "nodenext",
     "importHelpers": true,
+    "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -14,7 +15,7 @@
     "forceConsistentCasingInFileNames": true,
     "removeComments": true,
     "types": ["node"],
-    "sourceMap": false,
+    "strictPropertyInitialization": false,
     "baseUrl": "./"
   },
   "include": ["./**/*.ts", "types/*.d.ts"],

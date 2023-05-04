@@ -11,6 +11,12 @@
       "name": "Run translate",
       "request": "launch",
       "type": "node-terminal"
+    },
+    {
+      "command": "npm run setup",
+      "name": "Run setup",
+      "request": "launch",
+      "type": "node-terminal"
     }
   ]
 }

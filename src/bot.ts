@@ -3,18 +3,9 @@ import MittensClient from "./utils/Client.js";
 import { handleTranslate } from "./translate/Translate.js";
 import Sentry from "@sentry/node";
 import { readEnv } from "./utils/env.js";
-import { ProfilingIntegration } from "@sentry/profiling-node";
+import { init } from "./init.js";
 
-Sentry.init({
-  dsn: "https://c9c992d5a347411db99537a0ed2c0094@o4505106964742144.ingest.sentry.io/4505106967691264",
-  integrations: [
-    new ProfilingIntegration(),
-    new Sentry.Integrations.Http({ tracing: true }),
-    ...Sentry.autoDiscoverNodePerformanceMonitoringIntegrations(),
-  ],
-  tracesSampleRate: 1.0,
-  profilesSampleRate: 1.0,
-});
+init();
 
 const boot = Sentry.startTransaction({
   op: "boot",
@@ -67,6 +58,7 @@ client.on("messageCreate", async (message: Message) => {
   });
   if (message.author.id === client.user!.id) return;
   await handleTranslate(message);
+  transaction.finish();
 });
 
 client.login(readEnv("DISCORD_TOKEN"));
