@@ -4,6 +4,7 @@ import { handleTranslate } from "./translate/Translate.js";
 import Sentry from "@sentry/node";
 import { readEnv } from "./utils/env.js";
 import { init } from "./init.js";
+import { scrape } from "./utils/schedule.js";
 
 init();
 
@@ -12,7 +13,7 @@ const boot = Sentry.startTransaction({
   name: "First time launch of Mittens",
 });
 
-const client = new MittensClient({
+export const client = new MittensClient({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.MessageContent,
@@ -22,6 +23,7 @@ const client = new MittensClient({
 
 // on boot
 client.once("ready", () => {
+  scrape();
   console.log("もしもし");
 });
 

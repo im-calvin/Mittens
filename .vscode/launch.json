@@ -17,6 +17,12 @@
       "name": "Run setup",
       "request": "launch",
       "type": "node-terminal"
+    },
+    {
+      "command": "npm run schedule",
+      "name": "Run schedule",
+      "request": "launch",
+      "type": "node-terminal"
     }
   ]
 }
