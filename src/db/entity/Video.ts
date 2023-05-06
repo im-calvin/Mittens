@@ -1,5 +1,6 @@
 import { Entity, PrimaryColumn, Column, ManyToOne, OneToMany, ManyToMany } from "typeorm";
 import { Streamer } from "./Streamer.js";
+import { DiscordUser } from "./DiscordUser.js";
 
 @Entity()
 export class Video {
@@ -22,7 +23,8 @@ export class Video {
   title: string;
 
   // the members that are in the video
-  @ManyToMany((type) => Streamer, (Streamer) => Streamer.id)
+  @OneToMany((type) => Streamer, (Streamer) => Streamer.id)
+  @ManyToMany((type) => DiscordUser, (DiscordUser) => DiscordUser.streamer_ids)
   @Column("simple-array")
   members: string[]; // JSONified array
 }

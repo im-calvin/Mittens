@@ -24,7 +24,11 @@ export default async function Setup(): Promise<void> {
   }
 
   for (let profile of profiles) {
-    const user = new DiscordUser(profile.user_id, profile.channel_id);
+    const user = new DiscordUser(
+      profile.user_id,
+      profile.channel_id,
+      profile.streamer_id
+    );
     await AppDataSource.manager.save(user);
   }
 

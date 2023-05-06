@@ -3,6 +3,7 @@ import members from "../../members.json" assert { type: "json" };
 import { readEnv } from "./env.js";
 import { AppDataSource } from "../db/data-source.js";
 import { Video } from "../db/entity/Video.js";
+import { Streamer } from "../db/entity/Streamer.js";
 import { ToadScheduler, SimpleIntervalJob, Task, AsyncTask } from "toad-scheduler";
 import { intervalTime } from "../constants.js";
 import { DiscordUser } from "../db/entity/DiscordUser.js";
@@ -14,16 +15,25 @@ const scheduler = new ToadScheduler();
 AppDataSource.isInitialized ? null : await AppDataSource.initialize();
 
 const videoRepo = AppDataSource.getRepository(Video);
+const userRepo = AppDataSource.getRepository(DiscordUser);
 
 /**
  * schedules a job to message users on discord about a particular video
  * @param date the time to schedule the job at
  */
 export function scheduleJob(date: Date, video: Video) {
-  const job = schedule.scheduleJob(date, function () {
+  const job = schedule.scheduleJob(date, async function () {
     // message users about a video
-    const user: User[] = videoRepo.createQueryBuilder("members");
-    // const users: DiscordUser[] = [];
+    // SELECT DiscordUser.user_id FROM DiscordUser INNER JOIN Streamer ON DiscordUser.user_id=Streamer.id INNER JOIN Video ON Streamer.id=Video.members WHERE Video.url="url goes here"
+
+    const users: DiscordUser[] = await userRepo
+      .createQueryBuilder("DiscordUser")
+      // .innerJoin(Streamer, "Streamer", "DiscordUser.streamer_id = Streamer.id")
+      .innerJoin(Video, "Video", "DiscordUser.streamer_ids=Video.members")
+      .where(`Video.url = ${video.url}`)
+      .select("DiscordUser.user_id")
+      .getMany();
+
     let user: DiscordUser;
     for (user of users) {
       const channel = client.channels.cache.get(user.channel_id) as TextChannel;
@@ -99,6 +109,6 @@ export function scrape() {
   scheduler.addSimpleIntervalJob(job);
   scheduleJob(
     new Date(new Date().getTime() + 2000),
-    new Video("a", new Date(), "a", ["a"])
+    new Video("a", new Date(), "a", ["UCO_aKKYxn4tvrqPjcTzZ6EQ"])
   );
 }

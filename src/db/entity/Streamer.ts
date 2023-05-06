@@ -18,8 +18,8 @@ export class Streamer {
     this.group = group;
   }
   // the id of the streamer (YouTube id)
-  @ManyToMany((type) => DiscordUser, (DiscordUser) => DiscordUser.user_id)
-  @ManyToMany((type) => Video, (Video) => Video.members)
+  @ManyToOne((type) => DiscordUser, (DiscordUser) => DiscordUser.streamer_ids)
+  @ManyToOne((type) => Video, (Video) => Video.members)
   @PrimaryColumn()
   id: string;
 
