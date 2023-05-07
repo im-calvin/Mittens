@@ -1,4 +1,5 @@
-import { Entity, PrimaryColumn } from "typeorm";
+import { Entity, PrimaryColumn, OneToMany, Relation, JoinColumn } from "typeorm";
+import { DiscordUserSubscription } from "./DiscordUserSubscription.js";
 
 @Entity({ name: "discord_users" })
 export class DiscordUser {
@@ -8,4 +9,7 @@ export class DiscordUser {
   // the discord user id of a particular user
   @PrimaryColumn()
   id: string;
+
+  @OneToMany(() => DiscordUserSubscription, (subscription) => subscription.discordUser)
+  subscriptions: Relation<DiscordUserSubscription[]>
 }

@@ -1,11 +1,20 @@
-import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn } from "typeorm";
+import {
+  Entity,
+  PrimaryColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
+  Relation,
+} from "typeorm";
 import { Video } from "./Video.js";
 import { DiscordUser } from "./DiscordUser.js";
 import { Group } from "./Group.js";
+import { DiscordUserSubscription } from "./DiscordUserSubscription.js";
 
 @Entity({ name: "streamers" })
 export class Streamer {
-  constructor(id: string, name: string, group: Group) {
+  constructor(id: string, name: string, group: Relation<Group>) {
     this.id = id;
     this.name = name;
     this.group = group;
@@ -20,7 +29,15 @@ export class Streamer {
   name: string;
 
   // the group that the streamer belongs to ("Myth, Gamers...")
-  @ManyToOne(() => Group, (group) => group.id)
-  @JoinColumn({ name: "group_id" })
-  group: Group;
+  @ManyToOne(() => Group, (group) => group.id, { eager: true })
+  @JoinColumn({ name: "group_id", referencedColumnName: "id" })
+  group: Relation<Group>;
+
+  @OneToMany(() => Video, (video) => video.hostStreamer, { eager: true })
+  videos: Relation<Video[]>;
+
+  @OneToMany(() => DiscordUserSubscription, (subscription) => subscription.streamer, {
+    eager: true,
+  })
+  subcriptions: Relation<DiscordUserSubscription[]>;
 }
