@@ -1,25 +1,17 @@
-import {
-  Entity,
-  PrimaryColumn,
-  Column,
-  OneToOne,
-  OneToMany,
-  ManyToMany,
-  ManyToOne,
-} from "typeorm";
+import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn } from "typeorm";
 import { Video } from "./Video.js";
 import { DiscordUser } from "./DiscordUser.js";
+import { Group } from "./Group.js";
 
-@Entity()
+@Entity({ name: "streamers" })
 export class Streamer {
-  constructor(id: string, name: string, group: string) {
+  constructor(id: string, name: string, group: Group) {
     this.id = id;
     this.name = name;
     this.group = group;
   }
-  // the id of the streamer (YouTube id)
-  @ManyToOne((type) => DiscordUser, (DiscordUser) => DiscordUser.streamer_ids)
-  @ManyToOne((type) => Video, (Video) => Video.members)
+
+  // the yt-id of the streamer ("UCO_aKKYxn4tvrqPjcTzZ6EQ for Fauna")
   @PrimaryColumn()
   id: string;
 
@@ -27,7 +19,8 @@ export class Streamer {
   @Column()
   name: string;
 
-  // the group that the streamer belongs to. Accessible via a lookup table (Hololive)
-  @Column()
-  group: string;
+  // the group that the streamer belongs to ("Myth, Gamers...")
+  @ManyToOne(() => Group, (group) => group.id)
+  @JoinColumn({ name: "group_id" })
+  group: Group;
 }

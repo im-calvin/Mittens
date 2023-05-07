@@ -19,7 +19,7 @@ export const client = new MittensClient({
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMessages,
   ],
-}); 
+});
 
 // on boot
 client.once("ready", () => {

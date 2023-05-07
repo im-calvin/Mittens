@@ -34,4 +34,6 @@ export interface HolodexVideo {
   description: string;
   songcount: number;
   channel_id: string;
+  mentions: HolodexChannel[] | undefined;
+  channel: HolodexChannel;
 }

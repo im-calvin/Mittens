@@ -9,6 +9,8 @@ import { intervalTime } from "../constants.js";
 import { DiscordUser } from "../db/entity/DiscordUser.js";
 import { client } from "../bot.js";
 import { Channel, TextChannel } from "discord.js";
+import { announceStream } from "./Message.js";
+import { HolodexVideo } from "./Holodex.js";
 
 const scheduler = new ToadScheduler();
 
@@ -24,21 +26,32 @@ const userRepo = AppDataSource.getRepository(DiscordUser);
 export function scheduleJob(date: Date, video: Video) {
   const job = schedule.scheduleJob(date, async function () {
     // message users about a video
-    // SELECT DiscordUser.user_id FROM DiscordUser INNER JOIN Streamer ON DiscordUser.user_id=Streamer.id INNER JOIN Video ON Streamer.id=Video.members WHERE Video.url="url goes here"
 
+    // get all users that follow the members that partipate in the video
     const users: DiscordUser[] = await userRepo
       .createQueryBuilder("DiscordUser")
-      // .innerJoin(Streamer, "Streamer", "DiscordUser.streamer_id = Streamer.id")
       .innerJoin(Video, "Video", "DiscordUser.streamer_ids=Video.members")
       .where(`Video.url = ${video.url}`)
       .select("DiscordUser.user_id")
       .getMany();
 
+    // iterate over the users and send messages in the respective channels
     let user: DiscordUser;
-    for (user of users) {
-      const channel = client.channels.cache.get(user.channel_id) as TextChannel;
-      channel.send("hi");
+    // group users based on their channel_ids (send one message that pings multiple in 1 channel)
+    /*
+    {
+      channel_id: [user_id1, user_id2]
     }
+    */
+    const groupedUsers = new Map();
+    for (user of users) {
+      groupedUsers.set(user.channel_id, [...user.user_id]);
+    }
+
+    // iterate over the channels and announce the streams
+    groupedUsers.forEach(async (user_ids, channel_id) => {
+      await announceStream(user_ids, channel_id, video);
+    });
   });
 }
 
@@ -62,27 +75,29 @@ export function scrape() {
         headers: { Accept: "application/json", "X-APIKEY": readEnv("HOLODEX_API_KEY") },
       }
     );
-    const videos = await response.json();
+    const videos: HolodexVideo[] = await response.json();
 
     // add the data to the db
     for (let video of videos) {
-      // video_members is the Video.members field in the db
-      const video_members = [];
+      // videoMembers is the Video.members field in the db
+      const videoMembers = [];
 
+      // add the mentioned members (if it exists) to the videoMembers arr
       if (video.mentions !== undefined) {
         for (let channel of video.mentions) {
-          video_members.push(channel.id);
+          videoMembers.push(channel.id);
         }
       }
 
-      video_members.push(video.channel.id);
+      videoMembers.push(video.channel.id);
 
       const url = `https://youtube.com/watch?v=${video.id}`;
       const db_vid = new Video(
         url,
         new Date(video.available_at),
         video.title,
-        video_members
+        videoMembers,
+        video.channel.name
       );
 
       try {
@@ -107,8 +122,4 @@ export function scrape() {
   );
 
   scheduler.addSimpleIntervalJob(job);
-  scheduleJob(
-    new Date(new Date().getTime() + 2000),
-    new Video("a", new Date(), "a", ["UCO_aKKYxn4tvrqPjcTzZ6EQ"])
-  );
 }

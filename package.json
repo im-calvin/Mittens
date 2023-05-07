@@ -7,8 +7,8 @@
     "clean": "rimraf ./dist database.sqlite",
     "start": "ts-node --esm src/bot.ts",
     "translate": "ts-node --esm src/translate/Translate.ts",
-    "typeorm": "typeorm-ts-node-commonjs",
-    "setup": "npm run clean && ts-node --esm src/db/setup.ts",
+    "typeorm": "typeorm-ts-node-esm",
+    "setup": "ts-node --esm src/db/setup.ts",
     "schedule": "ts-node --esm src/utils/schedule.ts",
     "test": "jest"
   },
