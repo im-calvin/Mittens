@@ -37,3 +37,18 @@ export interface HolodexVideo {
   mentions: HolodexChannel[] | undefined;
   channel: HolodexChannel;
 }
+
+// get the list of channels and put it into the db
+const url = 'https://holodex.net/api/v2/channels?type=vtuber&org=Hololive';
+const options = {
+  method: 'GET',
+  headers: {Accept: 'application/json', 'X-APIKEY': '8eed9e38-769c-4907-9fe7-d7bcac20f21c'}
+};
+
+try {
+  const response = await fetch(url, options);
+  const data = await response.json();
+  console.log(data);
+} catch (error) {
+  console.error(error);
+}
