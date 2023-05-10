@@ -23,6 +23,12 @@
       "name": "Run schedule",
       "request": "launch",
       "type": "node-terminal"
+    },
+    {
+      "command": "npm run holodex",
+      "name": "Run holodex",
+      "request": "launch",
+      "type": "node-terminal"
     }
   ]
 }

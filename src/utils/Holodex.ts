@@ -1,3 +1,5 @@
+import { readEnv } from "./env.js";
+
 export interface HolodexChannel {
   id: string;
   name: string;
@@ -38,17 +40,28 @@ export interface HolodexVideo {
   channel: HolodexChannel;
 }
 
-// get the list of channels and put it into the db
-const url = 'https://holodex.net/api/v2/channels?type=vtuber&org=Hololive';
-const options = {
-  method: 'GET',
-  headers: {Accept: 'application/json', 'X-APIKEY': '8eed9e38-769c-4907-9fe7-d7bcac20f21c'}
-};
+export default async function getHoloChannels(): Promise<HolodexChannel[]> {
+  const res: HolodexChannel[] = [];
 
-try {
-  const response = await fetch(url, options);
-  const data = await response.json();
-  console.log(data);
-} catch (error) {
-  console.error(error);
+  let offset = 0;
+
+  let data: HolodexChannel[] = [];
+
+  const options = {
+    method: "GET",
+    headers: { Accept: "application/json", "X-APIKEY": readEnv("HOLODEX_API_KEY") },
+  };
+
+  do {
+    // get the list of channels and put it into the db
+    let url = `https://holodex.net/api/v2/channels?type=vtuber&org=Hololive&offset=${offset}`;
+    let response = await fetch(url, options);
+    data = await response.json();
+    res.push(...data);
+    offset += 25;
+  } while (data.length !== 0);
+
+  return res;
 }
+
+getHoloChannels();

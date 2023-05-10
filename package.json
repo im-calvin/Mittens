@@ -10,6 +10,7 @@
     "typeorm": "typeorm-ts-node-esm",
     "setup": "ts-node --esm src/db/setup.ts",
     "schedule": "ts-node --esm src/utils/schedule.ts",
+    "holodex": "ts-node-esm src/utils/Holodex.ts",
     "test": "jest"
   },
   "repository": {
