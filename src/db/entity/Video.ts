@@ -21,7 +21,7 @@ export class Video {
     this.id = id;
     this.scheduledTime = scheduledTime;
     this.title = title;
-    this.hostStreamer = hostStreamer;
+    this.hostStreamer = hostStreamer
   }
   // the url of the video
   @PrimaryColumn()

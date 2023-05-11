@@ -1,10 +1,21 @@
-import { Entity, PrimaryGeneratedColumn, Column, JoinColumn, ManyToOne, Relation } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  JoinColumn,
+  ManyToOne,
+  Relation,
+} from "typeorm";
 import { DiscordUser } from "./DiscordUser.js";
 import { Streamer } from "./Streamer.js";
 
 @Entity({ name: "discord_user_subscriptions" })
 export class DiscordUserSubscription {
-  constructor(discordUser: Relation<DiscordUser>, discordChannelId: string, streamer: Relation<Streamer>) {
+  constructor(
+    discordUser: Relation<DiscordUser>,
+    discordChannelId: string,
+    streamer: Relation<Streamer>
+  ) {
     this.discordUser = discordUser;
     this.discordChannelId = discordChannelId;
     this.streamer = streamer;
@@ -13,7 +24,7 @@ export class DiscordUserSubscription {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => DiscordUser, (discordUser) => discordUser.id)
+  @ManyToOne(() => DiscordUser, (discordUser) => discordUser.id, { eager: true })
   @JoinColumn({ name: "discord_user_id", referencedColumnName: "id" })
   discordUser: Relation<DiscordUser>;
 

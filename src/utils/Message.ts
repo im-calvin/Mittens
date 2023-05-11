@@ -29,8 +29,8 @@ export async function announceStream(
 
   // get a list of all the users to mention
   await channel.send(`
-    **${video.owner}** scheduled a stream at ${absTime} / ${relTime}
-    ${video.url}
+    **${video.hostStreamer.name}** scheduled a stream at ${absTime} / ${relTime}
+    ${video.id}
     ${mentions}
   `);
 }

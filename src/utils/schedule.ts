@@ -1,5 +1,4 @@
 import schedule from "node-schedule";
-import members from "../../members.json" assert { type: "json" };
 import { readEnv } from "./env.js";
 import { AppDataSource } from "../db/data-source.js";
 import { Video } from "../db/entity/Video.js";
@@ -11,6 +10,7 @@ import { client } from "../bot.js";
 import { Channel, TextChannel } from "discord.js";
 import { announceStream } from "./Message.js";
 import { HolodexVideo } from "./Holodex.js";
+import { DiscordUserSubscription } from "../db/entity/DiscordUserSubscription.js";
 
 const scheduler = new ToadScheduler();
 
@@ -18,6 +18,8 @@ AppDataSource.isInitialized ? null : await AppDataSource.initialize();
 
 const videoRepo = AppDataSource.getRepository(Video);
 const userRepo = AppDataSource.getRepository(DiscordUser);
+const subRepo = AppDataSource.getRepository(DiscordUserSubscription);
+const streamerRepo = AppDataSource.getRepository(Streamer);
 
 /**
  * schedules a job to message users on discord about a particular video
@@ -28,38 +30,38 @@ export function scheduleJob(date: Date, video: Video) {
     // message users about a video
 
     // get all users that follow the members that partipate in the video
-    const users: DiscordUser[] = await userRepo
-      .createQueryBuilder("DiscordUser")
-      .innerJoin(Video, "Video", "DiscordUser.streamer_ids=Video.members")
-      .where(`Video.url = ${video.url}`)
-      .select("DiscordUser.user_id")
-      .getMany();
+    const hostSubscriptions = video.hostStreamer.subcriptions;
+    const participantSubscriptions = video.participantStreamers.flatMap(
+      (s) => s.subcriptions
+    );
+    const subscriptions = [...hostSubscriptions, ...participantSubscriptions];
+    // console.log(users);
 
     // iterate over the users and send messages in the respective channels
-    let user: DiscordUser;
     // group users based on their channel_ids (send one message that pings multiple in 1 channel)
-    /*
-    {
-      channel_id: [user_id1, user_id2]
-    }
-    */
-    const groupedUsers = new Map();
-    for (user of users) {
-      groupedUsers.set(user.channel_id, [...user.user_id]);
-    }
-
-    // iterate over the channels and announce the streams
-    groupedUsers.forEach(async (user_ids, channel_id) => {
-      await announceStream(user_ids, channel_id, video);
+    subscriptions.map(async (s) => {
+      // select all users that are in a subscription
+      const discordUsers = await userRepo.find({
+        where: {
+          id: s.discordUser.id,
+        },
+        relations: {
+          subscriptions: true,
+        },
+      });
+      const users = discordUsers.map((u) => u.id);
+      await announceStream(users, s.discordChannelId, video);
     });
   });
 }
 
-const mems: string[] = [];
 // load list of member
-for (let member of members) {
-  mems.push(member.id);
-}
+const streamers = await streamerRepo.find({
+  relations: {
+    group: true,
+    subcriptions: true,
+  },
+});
 
 /**
  * periodically (based on intervalTime in constants.ts) scrapes Holodex and updates the database for videos
@@ -69,7 +71,9 @@ export function scrape() {
     // fetch all upcoming streams from holodex
     // relevant docs: https://holodex.stoplight.io/docs/holodex/f1e355dc4cb79-quickly-access-live-upcoming-for-a-set-of-channels
     const response = await fetch(
-      `https://holodex.net/api/v2/users/live?channels=${mems.toString()}`,
+      `https://holodex.net/api/v2/users/live?channels=${streamers
+        .map((s) => s.id)
+        .toString()}`,
       {
         method: "GET",
         headers: { Accept: "application/json", "X-APIKEY": readEnv("HOLODEX_API_KEY") },
@@ -79,6 +83,9 @@ export function scrape() {
 
     // add the data to the db
     for (let video of videos) {
+      if (video.channel.org !== "Hololive") {
+        break; // TODO find a better workaround. Issue: when the original video creator is not from Hololive, the streamer isn't in the db and then it crashes
+      }
       // videoMembers is the Video.members field in the db
       const videoMembers = [];
 
@@ -89,16 +96,16 @@ export function scrape() {
         }
       }
 
+      // get the original channel
       videoMembers.push(video.channel.id);
+      const streamer = await streamerRepo.findOneOrFail({
+        where: {
+          id: video.channel.id,
+        },
+      });
 
       const url = `https://youtube.com/watch?v=${video.id}`;
-      const db_vid = new Video(
-        url,
-        new Date(video.available_at),
-        video.title,
-        videoMembers,
-        video.channel.name
-      );
+      const db_vid = new Video(url, new Date(video.available_at), video.title, streamer);
 
       try {
         // try to save, if it goes through then
