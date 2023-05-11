@@ -6,7 +6,7 @@ export interface HolodexChannel {
   english_name: string | null;
   type: "vtuber" | "subber";
   org: string | null;
-  suborg: string | null;
+  group: string | null;
   photo: string | null;
   banner: string | null;
   twitter: string | null;
@@ -40,7 +40,7 @@ export interface HolodexVideo {
   channel: HolodexChannel;
 }
 
-export default async function getHoloChannels(): Promise<HolodexChannel[]> {
+export async function getHoloChannels(): Promise<HolodexChannel[]> {
   const res: HolodexChannel[] = [];
 
   let offset = 0;
@@ -63,5 +63,3 @@ export default async function getHoloChannels(): Promise<HolodexChannel[]> {
 
   return res;
 }
-
-getHoloChannels();

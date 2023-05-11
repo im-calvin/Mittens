@@ -29,6 +29,12 @@
       "name": "Run holodex",
       "request": "launch",
       "type": "node-terminal"
+    },
+    {
+      "command": "npm run migration",
+      "name": "Run migration",
+      "request": "launch",
+      "type": "node-terminal"
     }
   ]
 }

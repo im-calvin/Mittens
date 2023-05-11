@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, Relation, JoinColumn } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  Relation,
+  JoinColumn,
+} from "typeorm";
 import { Streamer } from "./Streamer.js";
 
 @Entity({ name: "groups" })
@@ -15,5 +22,5 @@ export class Group {
   name: string;
 
   @OneToMany(() => Streamer, (streamer) => streamer.group)
-  streamers: Relation<Streamer[]>
+  streamers: Relation<Streamer[]>;
 }

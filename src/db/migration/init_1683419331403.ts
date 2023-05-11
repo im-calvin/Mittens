@@ -20,7 +20,30 @@ export default class Init_1683419331403 implements MigrationInterface {
             type: "text",
           },
           {
-            name: "streamer_id",
+            name: "host_streamer_id",
+            type: "integer",
+          },
+        ],
+      })
+    );
+
+    await queryRunner.createTable(
+      new Table({
+        name: "video_participants",
+        columns: [
+          {
+            name: "id",
+            type: "integer",
+            isPrimary: true,
+            isGenerated: true,
+            generationStrategy: "increment",
+          },
+          {
+            name: "video_id",
+            type: "text",
+          },
+          {
+            name: "participant_streamer_id",
             type: "integer",
           },
         ],
@@ -80,12 +103,26 @@ export default class Init_1683419331403 implements MigrationInterface {
     await queryRunner.createForeignKey(
       "videos",
       new TableForeignKey({
-        columnNames: ["streamer_id"],
+        columnNames: ["host_streamer_id"],
         referencedTableName: "streamers",
         referencedColumnNames: ["id"],
         onDelete: "CASCADE",
       })
     );
+    await queryRunner.createForeignKeys("video_participants", [
+      new TableForeignKey({
+        columnNames: ["video_id"],
+        referencedTableName: "videos",
+        referencedColumnNames: ["id"],
+        onDelete: "CASCADE",
+      }),
+      new TableForeignKey({
+        columnNames: ["participant_streamer_id"],
+        referencedTableName: "streamers",
+        referencedColumnNames: ["id"],
+        onDelete: "CASCADE",
+      }),
+    ]);
 
     await queryRunner.createTable(
       new Table({
