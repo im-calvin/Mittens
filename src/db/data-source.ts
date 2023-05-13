@@ -7,7 +7,7 @@ import { Group } from "./entity/Group.js";
 import { DiscordUserSubscription } from "./entity/DiscordUserSubscription.js";
 import InitMigration from "./migration/init_1683419331403.js";
 import AddStreamers from "./migration/1683678846151-AddStreamers.js";
-import AddUsers from "./migration/1683799674398-AddUsers.js"
+import AddUsers from "./migration/1683799674398-AddUsers.js";
 
 export const AppDataSource = new DataSource({
   type: "sqlite",
@@ -15,7 +15,7 @@ export const AppDataSource = new DataSource({
   synchronize: false,
   logging: false,
   entities: [Video, DiscordUser, Streamer, Group, DiscordUserSubscription],
-  migrations: [InitMigration, AddStreamers, AddUsers],
+  migrations: [InitMigration, AddStreamers],
   subscribers: [],
   migrationsTransactionMode: "all",
 });

@@ -12,7 +12,7 @@ import { Streamer } from "./Streamer.js";
 @Entity({ name: "discord_user_subscriptions" })
 export class DiscordUserSubscription {
   constructor(
-    discordUser: Relation<DiscordUser>,
+    discordUser: Relation<DiscordUser[]>,
     discordChannelId: string,
     streamer: Relation<Streamer>
   ) {
@@ -26,7 +26,7 @@ export class DiscordUserSubscription {
 
   @ManyToOne(() => DiscordUser, (discordUser) => discordUser.id, { eager: true })
   @JoinColumn({ name: "discord_user_id", referencedColumnName: "id" })
-  discordUser: Relation<DiscordUser>;
+  discordUser: Relation<DiscordUser[]>;
 
   @Column({ name: "discord_channel_id" })
   discordChannelId: string;
