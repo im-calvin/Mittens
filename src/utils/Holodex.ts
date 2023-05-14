@@ -5,7 +5,7 @@ export interface HolodexChannel {
   name: string;
   english_name: string | null;
   type: "vtuber" | "subber";
-  org: string | null;
+  org: "Hololive" | string | null;
   group: string | null;
   photo: string | null;
   banner: string | null;
