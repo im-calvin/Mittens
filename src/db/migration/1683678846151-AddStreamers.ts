@@ -6,7 +6,6 @@ export default class AddStreamers1683678846151 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // connection already created
     const channels = await getHoloChannels();
-    AppDataSource.createEntityManager(queryRunner);
 
     // array of unique group names
     const groupNames = channels
@@ -32,6 +31,29 @@ export default class AddStreamers1683678846151 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    throw new Error("AddStreamers migration failed");
+    // connection already created
+    const channels = await getHoloChannels();
+
+    // array of unique group names
+    const groupNames = channels
+      .map((c) => c.group)
+      .filter((value, index, array) => {
+        return array.indexOf(value) === index;
+      });
+    const groupDeleteStmt = `DELETE FROM groups WHERE (name)=(?)`;
+    for (const group of groupNames) {
+      await queryRunner.query(groupDeleteStmt, [group]);
+    }
+
+    /* [{
+            id: 1,
+            name: "HOLOSTARS English..."
+          }, ...] */
+    const groups = await queryRunner.query(`SELECT id, name FROM groups`);
+    const channelDeleteStmt = `DELETE FROM streamers WHERE (id, name, group_id)=(?, ?, ?)`;
+    for (const channel of channels) {
+      const groupId = groups.find((g: any) => g.name === channel.group).id;
+      await queryRunner.query(channelDeleteStmt, [channel.id, channel.name, groupId]);
+    }
   }
 }
