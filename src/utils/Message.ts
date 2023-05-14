@@ -1,9 +1,7 @@
-import { TextChannel, userMention } from "discord.js";
+import { TextChannel, userMention, roleMention, time } from "discord.js";
 import { Video } from "../db/entity/Video.js";
 import { DiscordUser } from "src/db/entity/DiscordUser.js";
-import { roleMention } from "discord.js";
 import { client } from "../bot.js";
-import { time } from "discord.js";
 
 /**
  *
