@@ -3,14 +3,13 @@ import { readEnv } from "./env.js";
 import { AppDataSource } from "../db/data-source.js";
 import { Video } from "../db/entity/Video.js";
 import { Streamer } from "../db/entity/Streamer.js";
-import { ToadScheduler, SimpleIntervalJob, Task, AsyncTask } from "toad-scheduler";
+import { ToadScheduler, SimpleIntervalJob, AsyncTask } from "toad-scheduler";
 import { intervalTime } from "../constants.js";
 import { DiscordUser } from "../db/entity/DiscordUser.js";
-import { client } from "../bot.js";
-import { Channel, TextChannel } from "discord.js";
 import { announceStream } from "./Message.js";
 import { HolodexVideo } from "./Holodex.js";
 import { DiscordUserSubscription } from "../db/entity/DiscordUserSubscription.js";
+import { VideoParticipant } from "../db/entity/VideoParticipant.js";
 
 const scheduler = new ToadScheduler();
 
@@ -20,37 +19,46 @@ const videoRepo = AppDataSource.getRepository(Video);
 const userRepo = AppDataSource.getRepository(DiscordUser);
 const subRepo = AppDataSource.getRepository(DiscordUserSubscription);
 const streamerRepo = AppDataSource.getRepository(Streamer);
+const participantRepo = AppDataSource.getRepository(VideoParticipant);
 
 /**
  * schedules a job to message users on discord about a particular video
  * @param date the time to schedule the job at
+ * @param video the video to message about
  */
 export function scheduleJob(date: Date, video: Video) {
   const job = schedule.scheduleJob(date, async function () {
     // message users about a video
 
     // get all users that follow the members that partipate in the video
-    const hostSubscriptions = video.hostStreamer.subcriptions;
-    const participantSubscriptions = video.participantStreamers.flatMap(
-      (s) => s.subcriptions
-    );
-    const subscriptions = [...hostSubscriptions, ...participantSubscriptions];
+    // const hostSubscriptions = video.hostStreamer.subcriptions;
+    // const participantSubscriptions = video.participantStreamers.flatMap(
+    //   (s) => s.subcriptions
+    // );
+    // const subscriptions = [...hostSubscriptions, ...participantSubscriptions];
     // console.log(users);
+
+    const streamers = [video.hostStreamer, video.participantStreamers];
+    const channelSubs = new Map();
 
     // iterate over the users and send messages in the respective channels
     // group users based on their channel_ids (send one message that pings multiple in 1 channel)
-    subscriptions.map(async (s) => {
-      // select all users that are in a subscription
-      const discordUsers = await userRepo.find({
+    for (const streamer of streamers) {
+      const subscriptions = await subRepo.find({
         where: {
-          id: s.discordUser.id,
-        },
-        relations: {
-          subscriptions: true,
+          streamer: streamer,
         },
       });
-      const users = discordUsers.map((u) => u.id);
-      await announceStream(users, s.discordChannelId, video);
+      // TODO make this better ?
+      for (const sub of subscriptions) {
+        const channelUsers = channelSubs.get(sub);
+        channelSubs.set(sub.discordChannelId, [...channelUsers, sub.id]);
+      }
+    }
+
+    channelSubs.forEach(async (userIds, channelId) => {
+      // select all users that are in a subscription
+      await announceStream(userIds, channelId, video);
     });
   });
 }
@@ -112,7 +120,14 @@ export function scrape() {
         // 1. schedule the message & mention the users for the 1st ping
         // 3. add to the db
         await videoRepo.save(db_vid);
-        scheduleJob(db_vid.scheduledTime, db_vid);
+        // TODO check that this also updates video_participants table
+        // if successful:
+        // update the video_participants table
+        for (const streamer of db_vid.participantStreamers) {
+          const participant = new VideoParticipant(db_vid, streamer);
+          await participantRepo.save(participant);
+        }
+        await scheduleJob(db_vid.scheduledTime, db_vid);
       } catch (err: unknown) {
         // TypeError = duplicate key
         // We want to continue on TypeError
