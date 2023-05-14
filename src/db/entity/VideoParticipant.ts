@@ -15,7 +15,7 @@ export class VideoParticipant {
     this.video = video;
     this.participantStreamer = participantStreamer;
   }
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn("increment")
   id: number;
 
   @ManyToOne(() => Video, (video) => video.id)

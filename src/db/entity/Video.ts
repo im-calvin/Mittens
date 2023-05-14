@@ -24,11 +24,11 @@ export class Video {
     this.hostStreamer = hostStreamer;
   }
   // the url of the video
-  @PrimaryColumn("varchar")
+  @PrimaryColumn("text")
   id: string;
 
   // the time that the video is scheduled to start
-  @Column({ type: "date", name: "scheduled_time" })
+  @Column({ type: "datetime", name: "scheduled_time" })
   scheduledTime: Date;
 
   // the title of the video

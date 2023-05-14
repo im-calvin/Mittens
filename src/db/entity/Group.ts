@@ -14,11 +14,11 @@ export class Group {
     this.name = name;
   }
 
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn("increment")
   id: number;
 
   // the name of the group
-  @Column("varchar")
+  @Column("text")
   name: string;
 
   @OneToMany(() => Streamer, (streamer) => streamer.group)

@@ -21,7 +21,7 @@ export class DiscordUserSubscription {
     this.streamer = streamer;
   }
 
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn("increment")
   id: number;
 
   @ManyToOne(() => DiscordUser, (discordUser) => discordUser.id, { eager: true })

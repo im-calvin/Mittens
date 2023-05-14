@@ -21,11 +21,11 @@ export class Streamer {
   }
 
   // the yt-id of the streamer ("UCO_aKKYxn4tvrqPjcTzZ6EQ for Fauna")
-  @PrimaryColumn("varchar")
+  @PrimaryColumn("text")
   id: string;
 
   // the name of the streamer ("Ceres Fauna")
-  @Column("varchar")
+  @Column("text")
   name: string;
 
   // the group that the streamer belongs to ("Myth, Gamers...")

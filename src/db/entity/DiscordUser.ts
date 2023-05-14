@@ -7,7 +7,7 @@ export class DiscordUser {
     this.id = id;
   }
   // the discord user id of a particular user
-  @PrimaryColumn("varchar")
+  @PrimaryColumn("text")
   id: string;
 
   @OneToMany(() => DiscordUserSubscription, (subscription) => subscription.discordUser)
