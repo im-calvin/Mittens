@@ -21,10 +21,10 @@ export class Video {
     this.id = id;
     this.scheduledTime = scheduledTime;
     this.title = title;
-    this.hostStreamer = hostStreamer
+    this.hostStreamer = hostStreamer;
   }
   // the url of the video
-  @PrimaryColumn()
+  @PrimaryColumn("varchar")
   id: string;
 
   // the time that the video is scheduled to start

@@ -18,7 +18,7 @@ export class Group {
   id: number;
 
   // the name of the group
-  @Column()
+  @Column("varchar")
   name: string;
 
   @OneToMany(() => Streamer, (streamer) => streamer.group)
