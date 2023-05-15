@@ -15,7 +15,7 @@ export const AppDataSource = new DataSource({
   synchronize: false,
   logging: false,
   entities: [Video, DiscordUser, Streamer, Group, DiscordUserSubscription],
-  migrations: [InitMigration, AddStreamers, AddUsers],
+  migrations: [InitMigration, AddStreamers],
   subscribers: [],
   migrationsTransactionMode: "all",
 });

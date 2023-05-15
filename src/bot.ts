@@ -6,7 +6,7 @@ import { readEnv } from "./utils/env.js";
 import { init } from "./init.js";
 import { scrape } from "./utils/schedule.js";
 
-init();
+await init();
 
 const boot = Sentry.startTransaction({
   op: "boot",
@@ -22,8 +22,8 @@ export const client = new MittensClient({
 });
 
 // on boot
-client.once("ready", () => {
-  scrape();
+client.once("ready", async () => {
+  await scrape();
   console.log("もしもし");
 });
 
