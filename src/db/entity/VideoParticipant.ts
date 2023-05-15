@@ -11,9 +11,9 @@ import { Video } from "./Video.js";
 
 @Entity({ name: "video_participants" })
 export class VideoParticipant {
-  constructor(video: Relation<Video>, participantStreamer: Relation<Streamer>) {
+  constructor(video: Relation<Video>, streamer: Relation<Streamer>) {
     this.video = video;
-    this.participantStreamer = participantStreamer;
+    this.streamer = streamer;
   }
   @PrimaryGeneratedColumn("increment")
   id: number;
@@ -25,5 +25,5 @@ export class VideoParticipant {
   // the streamer that is part of the video
   @ManyToOne(() => Streamer, (streamer) => streamer.id)
   @JoinColumn({ name: "participant_streamer_id", referencedColumnName: "id" })
-  participantStreamer: Relation<Streamer>;
+  streamer: Relation<Streamer>;
 }

@@ -8,9 +8,9 @@ import {
   Relation,
 } from "typeorm";
 import { Video } from "./Video.js";
-import { DiscordUser } from "./DiscordUser.js";
 import { Group } from "./Group.js";
 import { DiscordUserSubscription } from "./DiscordUserSubscription.js";
+import { VideoParticipant } from "./VideoParticipant.js";
 
 @Entity({ name: "streamers" })
 export class Streamer {
@@ -40,4 +40,7 @@ export class Streamer {
     eager: true,
   })
   subcriptions: Relation<DiscordUserSubscription[]>;
+
+  @OneToMany(() => VideoParticipant, (participant) => participant.streamer)
+  videoParticipant: Relation<VideoParticipant[]>;
 }

@@ -8,7 +8,7 @@ import {
   OneToMany,
 } from "typeorm";
 import { Streamer } from "./Streamer.js";
-import { DiscordUser } from "./DiscordUser.js";
+import { VideoParticipant } from "./VideoParticipant.js";
 
 @Entity({ name: "videos" })
 export class Video {
@@ -40,6 +40,8 @@ export class Video {
   @JoinColumn({ name: "host_streamer_id", referencedColumnName: "id" })
   hostStreamer: Relation<Streamer>;
 
-  @OneToMany(() => Streamer, (streamer) => streamer.id)
-  participantStreamers: Relation<Streamer[]>;
+  @OneToMany(() => VideoParticipant, (participant) => participant.video, {
+    cascade: true,
+  })
+  participantStreamers: Relation<VideoParticipant[]>;
 }
