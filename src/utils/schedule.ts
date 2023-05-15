@@ -16,7 +16,6 @@ const scheduler = new ToadScheduler();
 AppDataSource.isInitialized ? null : await AppDataSource.initialize();
 
 const videoRepo = AppDataSource.getRepository(Video);
-const userRepo = AppDataSource.getRepository(DiscordUser);
 const subRepo = AppDataSource.getRepository(DiscordUserSubscription);
 const streamerRepo = AppDataSource.getRepository(Streamer);
 const participantRepo = AppDataSource.getRepository(VideoParticipant);
@@ -31,15 +30,8 @@ export function scheduleJob(date: Date, video: Video) {
     // message users about a video
 
     // get all users that follow the members that partipate in the video
-    // const hostSubscriptions = video.hostStreamer.subcriptions;
-    // const participantSubscriptions = video.participantStreamers.flatMap(
-    //   (s) => s.subcriptions
-    // );
-    // const subscriptions = [...hostSubscriptions, ...participantSubscriptions];
-    // console.log(users);
-
-    const streamers = [video.hostStreamer, video.participantStreamers];
-    const channelSubs = new Map();
+    const streamers = [video.hostStreamer, ...video.participantStreamers];
+    const channelSubs = new Map<string, string[]>();
 
     // iterate over the users and send messages in the respective channels
     // group users based on their channel_ids (send one message that pings multiple in 1 channel)
@@ -51,30 +43,38 @@ export function scheduleJob(date: Date, video: Video) {
       });
       // TODO make this better ?
       for (const sub of subscriptions) {
-        const channelUsers = channelSubs.get(sub);
-        channelSubs.set(sub.discordChannelId, [...channelUsers, sub.id]);
+        const channelUsers = channelSubs.get(sub.discordChannelId);
+        if (channelUsers === undefined) {
+          channelSubs.set(sub.discordChannelId, [sub.id as unknown as string]);
+        } else {
+          channelSubs.set(sub.discordChannelId, [
+            ...channelUsers,
+            sub.id as unknown as string,
+          ]);
+        }
       }
     }
 
-    channelSubs.forEach(async (userIds, channelId) => {
-      // select all users that are in a subscription
-      await announceStream(userIds, channelId, video);
-    });
+    Promise.all(
+      Array.from(channelSubs.entries()).map(async ([channelId, userIds]) => {
+        await announceStream(userIds, channelId, video);
+      })
+    );
   });
 }
-
-// load list of member
-const streamers = await streamerRepo.find({
-  relations: {
-    group: true,
-    subcriptions: true,
-  },
-});
 
 /**
  * periodically (based on intervalTime in constants.ts) scrapes Holodex and updates the database for videos
  */
-export function scrape() {
+export async function scrape() {
+  // load list of member
+  const streamers = await streamerRepo.find({
+    relations: {
+      group: true,
+      subcriptions: true,
+    },
+  });
+
   const task = new AsyncTask("scrape Holodex", async () => {
     // fetch all upcoming streams from holodex
     // relevant docs: https://holodex.stoplight.io/docs/holodex/f1e355dc4cb79-quickly-access-live-upcoming-for-a-set-of-channels
@@ -90,7 +90,7 @@ export function scrape() {
     const videos: HolodexVideo[] = await response.json();
 
     // add the data to the db
-    for (let video of videos) {
+    for (const video of videos) {
       if (video.channel.org !== "Hololive") {
         break; // TODO find a better workaround. Issue: when the original video creator is not from Hololive, the streamer isn't in the db and then it crashes
       }
@@ -99,7 +99,7 @@ export function scrape() {
 
       // add the mentioned members (if it exists) to the videoMembers arr
       if (video.mentions !== undefined) {
-        for (let channel of video.mentions) {
+        for (const channel of video.mentions) {
           videoMembers.push(channel.id);
         }
       }
@@ -115,7 +115,15 @@ export function scrape() {
       const url = `https://youtube.com/watch?v=${video.id}`;
       const db_vid = new Video(url, new Date(video.available_at), video.title, streamer);
 
-      try {
+      // check to see if video is in db
+      const maybeVideo = videoRepo.findOne({
+        where: {
+          id: db_vid.id,
+        },
+      });
+      if (maybeVideo === null) {
+        throw new Error("Unable to save video to database (not a duplicate key error)");
+      } else {
         // try to save, if it goes through then
         // 1. schedule the message & mention the users for the 1st ping
         // 3. add to the db
@@ -128,12 +136,6 @@ export function scrape() {
           await participantRepo.save(participant);
         }
         await scheduleJob(db_vid.scheduledTime, db_vid);
-      } catch (err: unknown) {
-        // TypeError = duplicate key
-        // We want to continue on TypeError
-        if (!(err instanceof TypeError)) {
-          throw new Error("Unable to save video to database (not a duplicate key error)");
-        }
       }
     }
   });
