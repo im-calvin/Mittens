@@ -7,7 +7,7 @@ import { ToadScheduler, SimpleIntervalJob, AsyncTask } from "toad-scheduler";
 import { intervalTime } from "../constants.js";
 import { DiscordUser } from "../db/entity/DiscordUser.js";
 import { announceStream } from "./Message.js";
-import { HolodexVideo } from "./Holodex.js";
+import { HolodexChannel, HolodexVideo } from "./Holodex.js";
 import { DiscordUserSubscription } from "../db/entity/DiscordUserSubscription.js";
 import { VideoParticipant } from "../db/entity/VideoParticipant.js";
 
@@ -26,35 +26,10 @@ const participantRepo = AppDataSource.getRepository(VideoParticipant);
  * @param video the video to message about
  */
 export function scheduleJob(date: Date, video: Video) {
+  // message users about a video
   const job = schedule.scheduleJob(date, async function () {
-    // message users about a video
-
     // get all users that follow the members that partipate in the video
-    const streamers = [video.hostStreamer, ...video.participantStreamers];
-    const channelSubs = new Map<string, string[]>();
-
-    // iterate over the users and send messages in the respective channels
-    // group users based on their channel_ids (send one message that pings multiple in 1 channel)
-    for (const streamer of streamers) {
-      const subscriptions = await subRepo.find({
-        where: {
-          streamer: streamer,
-        },
-      });
-      // TODO make this better ?
-      for (const sub of subscriptions) {
-        const channelUsers = channelSubs.get(sub.discordChannelId);
-        if (channelUsers === undefined) {
-          channelSubs.set(sub.discordChannelId, [sub.id as unknown as string]);
-        } else {
-          channelSubs.set(sub.discordChannelId, [
-            ...channelUsers,
-            sub.id as unknown as string,
-          ]);
-        }
-      }
-    }
-
+    const channelSubs = await getChannelSubs(video);
     Promise.all(
       Array.from(channelSubs.entries()).map(async ([channelId, userIds]) => {
         await announceStream(userIds, channelId, video);
@@ -92,20 +67,20 @@ export async function scrape() {
     // add the data to the db
     for (const video of videos) {
       if (video.channel.org !== "Hololive") {
-        break; // TODO find a better workaround. Issue: when the original video creator is not from Hololive, the streamer isn't in the db and then it crashes
+        continue; // TODO find a better workaround. Issue: when the original video creator is not from Hololive, the streamer isn't in the db and then it crashes
       }
       // videoMembers is the Video.members field in the db
-      const videoMembers = [];
+      const videoMembers: HolodexChannel[] = [];
 
       // add the mentioned members (if it exists) to the videoMembers arr
       if (video.mentions !== undefined) {
         for (const channel of video.mentions) {
-          videoMembers.push(channel.id);
+          videoMembers.push(channel);
         }
       }
 
       // get the original channel
-      videoMembers.push(video.channel.id);
+      videoMembers.push(video.channel);
       const streamer = await streamerRepo.findOneOrFail({
         where: {
           id: video.channel.id,
@@ -116,14 +91,13 @@ export async function scrape() {
       const db_vid = new Video(url, new Date(video.available_at), video.title, streamer);
 
       // check to see if video is in db
-      const maybeVideo = videoRepo.findOne({
+      const maybeVideo = await videoRepo.findOne({
         where: {
           id: db_vid.id,
         },
       });
+      // if video is not in db then
       if (maybeVideo === null) {
-        throw new Error("Unable to save video to database (not a duplicate key error)");
-      } else {
         // try to save, if it goes through then
         // 1. schedule the message & mention the users for the 1st ping
         // 3. add to the db
@@ -131,11 +105,18 @@ export async function scrape() {
         // TODO check that this also updates video_participants table
         // if successful:
         // update the video_participants table
-        for (const streamer of db_vid.participantStreamers) {
-          const participant = new VideoParticipant(db_vid, streamer);
+        for (const vid_streamer of videoMembers) {
+          const db_streamer = await streamerRepo.findOneByOrFail({
+            id: vid_streamer.id,
+          });
+          const participant = new VideoParticipant(db_vid, db_streamer);
           await participantRepo.save(participant);
         }
-        await scheduleJob(db_vid.scheduledTime, db_vid);
+
+        // mention users for the 1st ping
+        scheduleJob(new Date(), db_vid);
+        // schedule job for the video
+        scheduleJob(db_vid.scheduledTime, db_vid);
       }
     }
   });
@@ -146,4 +127,46 @@ export async function scrape() {
   );
 
   scheduler.addSimpleIntervalJob(job);
+}
+
+/**
+ * gets all of the discord users that follow the streamers in the video
+ * @param video the video to get the users for
+ * @returns a map of discord channel ids to the users that follow the streamers in the video
+ */
+async function getChannelSubs(video: Video): Promise<Map<string, string[]>> {
+  let streamers = [];
+  if (video.participantStreamers === undefined) {
+    streamers = [video.hostStreamer];
+  } else {
+    streamers = [
+      video.hostStreamer,
+      ...video.participantStreamers.map((p) => p.streamer),
+    ];
+  }
+  const channelSubs = new Map<string, string[]>();
+
+  // iterate over the users and send messages in the respective channels
+  // group users based on their channel_ids (send one message that pings multiple in 1 channel)
+  for (const streamer of streamers) {
+    const subscriptions = await subRepo.find({
+      where: {
+        streamer: streamer,
+      },
+    });
+    // TODO check the casting
+    for (const sub of subscriptions) {
+      const channelUsers = channelSubs.get(sub.discordChannelId);
+      if (channelUsers === undefined) {
+        channelSubs.set(sub.discordChannelId, [sub.id as unknown as string]);
+      } else {
+        channelSubs.set(sub.discordChannelId, [
+          ...channelUsers,
+          sub.id as unknown as string,
+        ]);
+      }
+    }
+  }
+
+  return channelSubs;
 }
