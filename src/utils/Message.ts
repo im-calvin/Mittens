@@ -4,7 +4,7 @@ import { DiscordUser } from "src/db/entity/DiscordUser.js";
 import { client } from "../bot.js";
 
 /**
- *
+ * a formatter to send messages over discord
  * @param user_ids the user_ids to announce
  * @param channel_id the channel_id to announce in
  * @param video the video to announce about
