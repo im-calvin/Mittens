@@ -52,6 +52,30 @@ client.on(Events.InteractionCreate, async (interaction: BaseInteraction) => {
   transaction.finish();
 });
 
+// handle autocomplete
+client.on(Events.InteractionCreate, async (interaction: BaseInteraction) => {
+  if (!interaction.isAutocomplete()) return;
+  const command = client.commands.get(interaction.commandName);
+
+  if (!command) {
+    console.error(`No command matching ${interaction.commandName} was found.`);
+    return;
+  }
+
+  const transaction = Sentry.startTransaction({
+    op: "autocomplete",
+    name: "Autocomplete interaction",
+  });
+
+  try {
+    await command.autoComplete(interaction);
+  } catch (error) {
+    console.error(`Error executing ${interaction.commandName}`);
+    console.error(error);
+  }
+  transaction.finish();
+});
+
 // handle translating
 client.on("messageCreate", async (message: Message) => {
   const transaction = Sentry.startTransaction({
