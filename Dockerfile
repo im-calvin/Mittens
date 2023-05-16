@@ -1,16 +1,20 @@
-# Use Node.js v as the base image
-FROM node:18.12.1
+# Use the official Node.js 18 image as the base image
+FROM node:18
 
-# Create a new directory for your bot files
+# Set the working directory in the container to /app
 WORKDIR /app
 
-# Copy your bot files into the container
-COPY . .
+# Copy the package.json and package-lock.json files into the container
+COPY package*.json ./
 
-# Install dependencies
+# Install the dependencies specified in the package.json file
 RUN npm install
 
-RUN npm install sqlite3 --save
+# Update the package index and install SQLite using apt-get
+RUN apt-get update && apt-get install -y sqlite3
 
-# Run the bot
+# Copy the rest of the application files into the container
+COPY . .
+
+# Set the default command to run when the container starts
 CMD ["npm", "start"]
