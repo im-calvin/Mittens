@@ -4,7 +4,6 @@ import { readEnv } from "./env.js";
 
 export default class MittensClient extends Client {
   #rest: REST = new REST().setToken(readEnv("DISCORD_TOKEN"));
-  /* "add": CommandData {data: SlashCommand, execute: function} */
   commands = new Collection<string, CommandData>();
   constructor(options: ClientOptions) {
     super(options);

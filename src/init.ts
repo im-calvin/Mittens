@@ -15,5 +15,6 @@ export async function init(): Promise<void> {
     profilesSampleRate: 1.0,
   });
   // start the db & run migrations
+  await AppDataSource.initialize();
   await AppDataSource.runMigrations();
 }

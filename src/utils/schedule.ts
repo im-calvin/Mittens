@@ -73,7 +73,7 @@ export async function scrape() {
         continue; // TODO find a better workaround. Issue: when the original video creator is not from Hololive, the streamer isn't in the db and then it crashes
       }
       // videoMembers is the Video.members field in the db
-      const videoMembers: HolodexChannel[] = [];
+      let videoMembers: HolodexChannel[] = [];
 
       // add the mentioned members (if it exists) to the videoMembers arr
       if (video.mentions !== undefined) {
@@ -105,7 +105,7 @@ export async function scrape() {
         // 1. schedule the message & mention the users for the 1st ping
         // 3. add to the db
         await videoRepo.save(db_vid);
-        // TODO check that this also updates video_participants table
+        // TODO for egora: is there a better way of optimizing saves and fetches from the database than doing them manually like this (cascade option in save?)
         // if successful:
         // update the video_participants table
         for (const vid_streamer of videoMembers) {
