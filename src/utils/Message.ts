@@ -1,6 +1,6 @@
 import { TextChannel, userMention, roleMention, time } from "discord.js";
 import { Video } from "../db/entity/Video.js";
-import { DiscordUser } from "src/db/entity/DiscordUser.js";
+import Sentry from "@sentry/node";
 import { client } from "../bot.js";
 
 /**
@@ -14,6 +14,10 @@ export async function announceStream(
   channel_id: string,
   video: Video
 ): Promise<void> {
+  const transaction = Sentry.startTransaction({
+    op: "announceStream",
+    name: "Announces a stream to a channel",
+  });
   const channel = client.channels.cache.get(channel_id) as TextChannel;
 
   // formatted as documented here: https://old.discordjs.dev/#/docs/discord.js/14.10.2/typedef/TimestampStylesString
@@ -31,4 +35,5 @@ export async function announceStream(
     ${video.id}
     ${mentions}
   `);
+  transaction.finish();
 }
