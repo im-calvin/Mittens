@@ -1,4 +1,5 @@
 import { readEnv } from "./env.js";
+import Sentry from "@sentry/node";
 
 export interface HolodexChannel {
   id: string;
@@ -40,7 +41,15 @@ export interface HolodexVideo {
   channel: HolodexChannel;
 }
 
+/**
+ *
+ * @returns a list of all the channels in Holodex from Hololive
+ */
 export async function getHoloChannels(): Promise<HolodexChannel[]> {
+  const transaction = Sentry.startTransaction({
+    op: "getHoloChannels",
+    name: "Gets all the channels in Holodex",
+  });
   const res: HolodexChannel[] = [];
 
   let offset = 0;
@@ -61,5 +70,6 @@ export async function getHoloChannels(): Promise<HolodexChannel[]> {
     offset += 25;
   } while (data.length !== 0);
 
+  transaction.finish();
   return res;
 }

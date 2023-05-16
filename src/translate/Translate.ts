@@ -1,6 +1,7 @@
 import { v3 } from "@google-cloud/translate";
 import { readEnv } from "../utils/env.js";
 import { Message } from "discord.js";
+import Sentry from "@sentry/node";
 import { targetConfidence, targetLanguage } from "../constants.js";
 
 const translationClient = new v3.TranslationServiceClient({
@@ -19,6 +20,10 @@ interface DetectedLanguage {
  * @returns the translated text in the target language
  */
 async function translateText(text: string, language: string): Promise<string> {
+  const transaction = Sentry.startTransaction({
+    op: "translateText",
+    name: "Translate text interaction",
+  });
   const request = {
     targetLanguageCode: "en",
     contents: text.split("\n"),
@@ -31,6 +36,7 @@ async function translateText(text: string, language: string): Promise<string> {
     throw new Error("No translation found");
   }
   const translatedText = translations.map((t) => t.translatedText).join("\n");
+  transaction.finish();
   return translatedText;
 }
 
@@ -40,6 +46,10 @@ async function translateText(text: string, language: string): Promise<string> {
  * @returns true if the text is detected as the target language
  */
 async function detectLanguage(text: string): Promise<DetectedLanguage> {
+  const transaction = Sentry.startTransaction({
+    op: "detectLanguage",
+    name: "Detects the language of the text",
+  });
   const request = { parent, content: text, mimeType: "text/plain" };
 
   const [{ languages }] = await translationClient.detectLanguage(request);
@@ -58,8 +68,7 @@ async function detectLanguage(text: string): Promise<DetectedLanguage> {
   )
     throw new Error("No detected language found");
 
-  // console.log(`Confidence: ${language.confidence}`);
-  // console.log(`Language: ${language.languageCode}`);
+  transaction.finish();
   return {
     confidence:
       language.confidence > targetConfidence &&

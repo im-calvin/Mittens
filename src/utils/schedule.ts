@@ -5,15 +5,13 @@ import { Video } from "../db/entity/Video.js";
 import { Streamer } from "../db/entity/Streamer.js";
 import { ToadScheduler, SimpleIntervalJob, AsyncTask } from "toad-scheduler";
 import { intervalTime } from "../constants.js";
-import { DiscordUser } from "../db/entity/DiscordUser.js";
+import Sentry from "@sentry/node";
 import { announceStream } from "./Message.js";
 import { HolodexChannel, HolodexVideo } from "./Holodex.js";
 import { DiscordUserSubscription } from "../db/entity/DiscordUserSubscription.js";
 import { VideoParticipant } from "../db/entity/VideoParticipant.js";
 
 const scheduler = new ToadScheduler();
-
-AppDataSource.isInitialized ? null : await AppDataSource.initialize();
 
 const videoRepo = AppDataSource.getRepository(Video);
 const subRepo = AppDataSource.getRepository(DiscordUserSubscription);
@@ -42,6 +40,11 @@ export function scheduleJob(date: Date, video: Video) {
  * periodically (based on intervalTime in constants.ts) scrapes Holodex and updates the database for videos
  */
 export async function scrape() {
+  const transaction = Sentry.startTransaction({
+    op: "scrapeHolodex",
+    name: "Scrapes Holodex for new Videos and schedules job to announce them",
+  });
+
   // load list of member
   const streamers = await streamerRepo.find({
     relations: {
@@ -127,6 +130,7 @@ export async function scrape() {
   );
 
   scheduler.addSimpleIntervalJob(job);
+  transaction.finish();
 }
 
 /**
@@ -135,6 +139,11 @@ export async function scrape() {
  * @returns a map of discord channel ids to the users that follow the streamers in the video
  */
 async function getChannelSubs(video: Video): Promise<Map<string, string[]>> {
+  const transaction = Sentry.startTransaction({
+    op: "getChannelSubs",
+    name: "Gets all of the discord users that follow the streamers in the video",
+  });
+
   let streamers = [];
   if (video.participantStreamers === undefined) {
     streamers = [video.hostStreamer];
@@ -167,6 +176,7 @@ async function getChannelSubs(video: Video): Promise<Map<string, string[]>> {
       }
     }
   }
+  transaction.finish();
 
   return channelSubs;
 }
