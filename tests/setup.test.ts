@@ -1,4 +1,4 @@
-import { scheduleJob } from "src/utils/schedule.js";
+import { scheduleAnnounce } from "src/utils/schedule.js";
 import { describe, test } from "node:test";
 
 describe("Schedule smoke test", () => {

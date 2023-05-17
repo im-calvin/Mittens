@@ -23,12 +23,12 @@ const participantRepo = AppDataSource.getRepository(VideoParticipant);
  * @param date the time to schedule the job at
  * @param video the video to message about
  */
-export function scheduleJob(date: Date, video: Video) {
+export function scheduleAnnounce(date: Date, video: Video) {
   // message users about a video
   const job = schedule.scheduleJob(date, async function () {
     // get all users that follow the members that partipate in the video
     const channelSubs = await getChannelSubs(video);
-    Promise.all(
+    await Promise.all(
       Array.from(channelSubs.entries()).map(async ([channelId, userIds]) => {
         await announceStream(userIds, channelId, video);
       })
@@ -117,9 +117,14 @@ export async function scrape() {
         }
 
         // mention users for the 1st ping
-        scheduleJob(new Date(), db_vid);
+        const channelSubs = await getChannelSubs(db_vid);
+        await Promise.all(
+          Array.from(channelSubs.entries()).map(async ([channelId, userIds]) => {
+            await announceStream(userIds, channelId, db_vid);
+          })
+        );
         // schedule job for the video
-        scheduleJob(db_vid.scheduledTime, db_vid);
+        scheduleAnnounce(db_vid.scheduledTime, db_vid);
       }
     }
   });

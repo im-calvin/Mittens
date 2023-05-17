@@ -13,7 +13,7 @@ export default class Init_1683419331403 implements MigrationInterface {
           },
           {
             name: "scheduled_time",
-            type: "text",
+            type: "timestamp",
           },
           {
             name: "title",
