@@ -25,11 +25,15 @@ const add: CommandData = {
     const discordUser = new DiscordUser(interaction.user.id);
     await AppDataSource.getRepository(DiscordUser).save(discordUser);
 
-    const streamer = await AppDataSource.getRepository(Streamer).findOneOrFail({
+    const streamer = await AppDataSource.getRepository(Streamer).findOne({
       where: {
         name: interaction.options.getString("streamer", true), // TODO this is unsafe because name is not a primary key hence there could be multiple?
       },
     });
+    if (streamer === null) {
+      await interaction.reply("Streamer not found!");
+      return;
+    }
     // TODO for egora: is there a better way of optimizing saves and fetches from the database than doing them manually like this (cascade option in save?)
     const discordUserSub = new DiscordUserSubscription(
       discordUser,
