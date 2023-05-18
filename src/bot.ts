@@ -82,7 +82,12 @@ client.on("messageCreate", async (message: Message) => {
     op: "msgCreate",
     name: "Message creation interaction",
   });
-  if (message.author.id === client.user!.id) return;
+  if (
+    message.author.id === client.user!.id ||
+    message.author.bot ||
+    message.content.startsWith("::")
+  )
+    return;
   await handleTranslate(message);
   transaction.finish();
 });
