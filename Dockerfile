@@ -16,5 +16,8 @@ RUN apt-get update && apt-get install -y sqlite3
 # Copy the rest of the application files into the container
 COPY . .
 
+# Create a volume for the SQLite database file
+VOLUME /app/data
+
 # Set the default command to run when the container starts
 CMD ["npm", "start"]
