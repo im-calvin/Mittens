@@ -28,7 +28,7 @@ const add: CommandData = {
     console.log(interaction.options.getString("streamer", true));
     const streamer = await AppDataSource.getRepository(Streamer).findOne({
       where: {
-        id: interaction.options.getString("streamer", true), 
+        id: interaction.options.getString("streamer", true),
       },
     });
     if (streamer === null) {
@@ -50,7 +50,7 @@ const add: CommandData = {
       await interaction.reply(`Failed to add ${streamer.name}!`);
       return;
     } else {
-      await AppDataSource.getRepository(DiscordUserSubscription).save(discordUserSub);
+      await AppDataSource.getRepository(DiscordUserSubscription).insert(discordUserSub);
       await interaction.reply(`Successfully added ${streamer.name}!`);
     }
   },

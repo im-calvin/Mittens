@@ -27,10 +27,21 @@ export function scheduleAnnounce(date: Date, video: Video) {
   // message users about a video
   const job = schedule.scheduleJob(date, async function () {
     // get all users that follow the members that partipate in the video
-    const channelSubs = await getChannelSubs(video);
+    const newVideo = await videoRepo.findOneOrFail({
+      where: {
+        id: video.id,
+      },
+      relations: {
+        participantStreamers: {
+          streamer: true,
+        },
+        hostStreamer: true,
+      },
+    });
+    const channelSubs = await getChannelSubs(newVideo);
     await Promise.all(
       Array.from(channelSubs.entries()).map(async ([channelId, userIds]) => {
-        await announceStream(userIds, channelId, video);
+        await announceStream(userIds, channelId, newVideo);
       })
     );
   });
@@ -125,6 +136,13 @@ export async function scrape() {
         );
         // schedule job for the video
         scheduleAnnounce(db_vid.scheduledTime, db_vid);
+      } else {
+        // if video is in db then update it with the new data
+        maybeVideo.scheduledTime = db_vid.scheduledTime;
+        maybeVideo.title = db_vid.title;
+        maybeVideo.hostStreamer = db_vid.hostStreamer;
+        maybeVideo.participantStreamers = db_vid.participantStreamers;
+        await videoRepo.save(maybeVideo);
       }
     }
   });
