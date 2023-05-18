@@ -23,11 +23,12 @@ const add: CommandData = {
   autoComplete: autoCompleteStreamers,
   execute: async (interaction) => {
     const discordUser = new DiscordUser(interaction.user.id);
-    await AppDataSource.getRepository(DiscordUser).save(discordUser);
+    await AppDataSource.getRepository(DiscordUser).upsert(discordUser, ["id"]);
 
+    console.log(interaction.options.getString("streamer", true));
     const streamer = await AppDataSource.getRepository(Streamer).findOne({
       where: {
-        name: interaction.options.getString("streamer", true), // TODO this is unsafe because name is not a primary key hence there could be multiple?
+        id: interaction.options.getString("streamer", true), 
       },
     });
     if (streamer === null) {
@@ -41,9 +42,17 @@ const add: CommandData = {
       streamer
     );
 
-    // allow the user to subscribe to the streamer even if they are already subscribed (because it will just update if it already exists)
-    await AppDataSource.getRepository(DiscordUserSubscription).save(discordUserSub);
-    await interaction.reply("Successfully added a user!");
+    // subscribe the user and err if they are already subscribed
+    const subscribed = await AppDataSource.getRepository(
+      DiscordUserSubscription
+    ).findOneBy(discordUserSub);
+    if (subscribed) {
+      await interaction.reply(`Failed to add ${streamer.name}!`);
+      return;
+    } else {
+      await AppDataSource.getRepository(DiscordUserSubscription).save(discordUserSub);
+      await interaction.reply(`Successfully added ${streamer.name}!`);
+    }
   },
 };
 

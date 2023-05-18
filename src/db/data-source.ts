@@ -11,9 +11,9 @@ import { VideoParticipant } from "./entity/VideoParticipant.js";
 
 export const AppDataSource = new DataSource({
   type: "sqlite",
-  database: "database.sqlite",
+  database: "data/database.sqlite",
   synchronize: false,
-  logging: false,
+  logging: "all",
   entities: [
     Video,
     DiscordUser,

@@ -21,7 +21,7 @@ export async function autoCompleteStreamers(interaction: AutocompleteInteraction
   const response = filtered
     .map((streamer) => ({
       name: streamer.name,
-      value: streamer.name,
+      value: streamer.id,
     }))
     .slice(0, 25);
   await interaction.respond(response);
