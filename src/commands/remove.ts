@@ -7,9 +7,9 @@ import { AppDataSource } from "../db/data-source.js";
 import { Streamer } from "../db/entity/Streamer.js";
 
 const command = new SlashCommandBuilder()
-  .setName("add")
+  .setName("remove")
   .setDescription(
-    "Adds a user to your subscription list in your current discord channel."
+    "Removes a user to your subscription list in your current discord channel."
   );
 // need to split this up for some reason
 command.addStringOption((option) =>
@@ -20,12 +20,11 @@ command.addStringOption((option) =>
     .setAutocomplete(true)
 );
 
-const add: CommandData = {
+const remove: CommandData = {
   command: command,
   autoComplete: autoCompleteStreamers,
   execute: async (interaction) => {
     const discordUser = new DiscordUser(interaction.user.id);
-    await AppDataSource.getRepository(DiscordUser).upsert(discordUser, ["id"]);
 
     const streamer = await AppDataSource.getRepository(Streamer).findOne({
       where: {
@@ -43,18 +42,18 @@ const add: CommandData = {
       streamer
     );
 
-    // subscribe the user and err if they are already subscribed
+    // check if the subscription exists and remove it if it does
     const subscribed = await AppDataSource.getRepository(
       DiscordUserSubscription
     ).findOneBy(discordUserSub);
     if (subscribed) {
-      await interaction.reply(`You are already subscribed to ${streamer.name}!`);
-      return;
+      await AppDataSource.getRepository(DiscordUserSubscription).remove(subscribed);
+      await interaction.reply(`Successfully removed ${streamer.name}!`);
     } else {
-      await AppDataSource.getRepository(DiscordUserSubscription).insert(discordUserSub);
-      await interaction.reply(`Successfully added ${streamer.name}!`);
+      await interaction.reply(`You're not following ${streamer.name}!`);
+      return;
     }
   },
 };
 
-export default add;
+export default remove;
