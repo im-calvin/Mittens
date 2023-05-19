@@ -25,9 +25,9 @@ export async function announceStream(
   const absTime = time(video.scheduledTime, "f");
   const relTime = time(video.scheduledTime, "R");
 
-  const mentions = "";
+  let mentions: string = "";
   for (let user_id of user_ids) {
-    mentions.concat(roleMention(user_id));
+    mentions = mentions.concat(roleMention(user_id));
   }
 
   // get a list of all the users to mention
