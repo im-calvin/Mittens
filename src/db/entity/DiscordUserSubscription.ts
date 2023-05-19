@@ -5,11 +5,13 @@ import {
   JoinColumn,
   ManyToOne,
   Relation,
+  Index,
 } from "typeorm";
 import { DiscordUser } from "./DiscordUser.js";
 import { Streamer } from "./Streamer.js";
 
 @Entity({ name: "discord_user_subscriptions" })
+@Index(["discordUser", "discordChannelId", "streamer"], { unique: true })
 export class DiscordUserSubscription {
   constructor(
     discordUser: Relation<DiscordUser>,
