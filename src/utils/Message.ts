@@ -12,7 +12,8 @@ import { client } from "../bot.js";
 export async function announceStream(
   user_ids: string[],
   channel_id: string,
-  video: Video
+  video: Video,
+  isLive: boolean
 ): Promise<void> {
   const transaction = Sentry.startTransaction({
     op: "announceStream",
@@ -31,7 +32,9 @@ export async function announceStream(
 
   // get a list of all the users to mention
   await channel.send(`
-    **${video.hostStreamer.name}** scheduled a stream at ${absTime} / ${relTime}
+    **${video.hostStreamer.name}** ${
+    isLive ? "is now live!" : `scheduled a stream at ${absTime} / ${relTime}`
+  }
     ${video.id}
     ${mentions}
   `);

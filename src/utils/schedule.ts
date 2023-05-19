@@ -23,7 +23,7 @@ const participantRepo = AppDataSource.getRepository(VideoParticipant);
  * @param date the time to schedule the job at
  * @param video the video to message about
  */
-export function scheduleAnnounce(date: Date, video: Video) {
+export function scheduleAnnounce(date: Date, video: Video, isLive: boolean) {
   // message users about a video
   const job = schedule.scheduleJob(date, async function () {
     // get all users that follow the members that partipate in the video
@@ -41,7 +41,7 @@ export function scheduleAnnounce(date: Date, video: Video) {
     const channelSubs = await getChannelSubs(newVideo);
     await Promise.all(
       Array.from(channelSubs.entries()).map(async ([channelId, userIds]) => {
-        await announceStream(userIds, channelId, newVideo);
+        await announceStream(userIds, channelId, newVideo, isLive);
       })
     );
   });
@@ -131,11 +131,11 @@ export async function scrape() {
         const channelSubs = await getChannelSubs(db_vid);
         await Promise.all(
           Array.from(channelSubs.entries()).map(async ([channelId, userIds]) => {
-            await announceStream(userIds, channelId, db_vid);
+            await announceStream(userIds, channelId, db_vid, false);
           })
         );
         // schedule job for the video
-        scheduleAnnounce(db_vid.scheduledTime, db_vid);
+        scheduleAnnounce(db_vid.scheduledTime, db_vid, true);
       } else {
         // if video is in db then update it with the new data
         maybeVideo.scheduledTime = db_vid.scheduledTime;
@@ -148,7 +148,7 @@ export async function scrape() {
   });
 
   const job = new SimpleIntervalJob(
-    { minutes: intervalTime, runImmediately: true },
+    { minutes: intervalTime, runImmediately: false },
     task
   );
 
@@ -190,11 +190,11 @@ async function getChannelSubs(video: Video): Promise<Map<string, string[]>> {
     for (const sub of subscriptions) {
       const channelUsers = channelSubs.get(sub.discordChannelId);
       if (channelUsers === undefined) {
-        channelSubs.set(sub.discordChannelId, [sub.id as unknown as string]);
+        channelSubs.set(sub.discordChannelId, [sub.discordUser.id as unknown as string]);
       } else {
         channelSubs.set(sub.discordChannelId, [
           ...channelUsers,
-          sub.id as unknown as string,
+          sub.discordUser.id as unknown as string,
         ]);
       }
     }
