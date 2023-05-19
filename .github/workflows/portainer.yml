@@ -1,0 +1,29 @@
+name: Portainer
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # clones the repository's code into the runner environment where the pipeline is executed
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build Docker image
+        run: docker build -t imcalvin/mittens:latest .
+
+      - name: Push Docker image
+        run: docker push imcalvin/mittens:latest
+
+      - name: Deploy to Portainer
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ env.PORTAINER_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"Image": "imcalvin/mittens:latest"}' \
+            YOUR_PORTAINER_API_URL/stacks/${{env.PORTAINER_STACK_ID}}?endpointId=${{env.PORTAINER.ENDPOINT_ID}}
