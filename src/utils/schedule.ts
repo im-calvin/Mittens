@@ -68,9 +68,7 @@ export async function scrape() {
     // fetch all upcoming streams from holodex
     // relevant docs: https://holodex.stoplight.io/docs/holodex/f1e355dc4cb79-quickly-access-live-upcoming-for-a-set-of-channels
     const response = await fetch(
-      `https://holodex.net/api/v2/users/live?channels=${streamers
-        .map((s) => s.id)
-        .toString()}`,
+      `https://holodex.net/api/v2/users/live?channels=${streamers.map((s) => s.id).toString()}`,
       {
         method: "GET",
         headers: { Accept: "application/json", "X-APIKEY": readEnv("HOLODEX_API_KEY") },
@@ -147,10 +145,7 @@ export async function scrape() {
     }
   });
 
-  const job = new SimpleIntervalJob(
-    { minutes: intervalTime, runImmediately: false },
-    task
-  );
+  const job = new SimpleIntervalJob({ minutes: intervalTime, runImmediately: false }, task);
 
   scheduler.addSimpleIntervalJob(job);
   transaction.finish();
@@ -171,10 +166,7 @@ async function getChannelSubs(video: Video): Promise<Map<string, string[]>> {
   if (video.participantStreamers === undefined) {
     streamers = [video.hostStreamer];
   } else {
-    streamers = [
-      video.hostStreamer,
-      ...video.participantStreamers.map((p) => p.streamer),
-    ];
+    streamers = [video.hostStreamer, ...video.participantStreamers.map((p) => p.streamer)];
   }
   const channelSubs = new Map<string, string[]>();
 

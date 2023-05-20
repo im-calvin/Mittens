@@ -2,7 +2,7 @@ import { DataSource, MigrationInterface, QueryRunner } from "typeorm";
 import { getHoloChannels } from "../../utils/Holodex.js";
 import { AppDataSource } from "../data-source.js";
 
-export default class AddStreamers1683678846151 implements MigrationInterface {
+export class AddStreamers1683678846151 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // connection already created
     const channels = await getHoloChannels();

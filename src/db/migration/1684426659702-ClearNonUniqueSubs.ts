@@ -1,6 +1,6 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export default class ClearNonUniqueSubs1684426659702 implements MigrationInterface {
+export class ClearNonUniqueSubs1684426659702 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // delete all non-unique rows in the discord_user_subscriptions table
     await queryRunner.query(`
