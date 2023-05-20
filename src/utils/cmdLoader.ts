@@ -19,7 +19,7 @@ export const commands: CommandData[] = [add, remove, list];
 export async function autoCompleteStreamers(interaction: AutocompleteInteraction) {
   const focusedValue = interaction.options.getString("streamer", true).toLowerCase();
   const streamers = await getDBStreamers();
-  const filtered = streamers.filter((s) => s.name.toLowerCase().startsWith(focusedValue));
+  const filtered = streamers.filter((s) => s.name.toLowerCase().includes(focusedValue));
   const response = filtered
     .map((streamer) => ({
       name: streamer.name,
