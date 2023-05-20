@@ -1,0 +1,7 @@
+version: '3'
+services:
+  mittens:
+    image: imcalvin/mittens:latest
+    restart: always
+    volumes:
+      - /nfs/mittens/data:/app/data
