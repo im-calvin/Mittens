@@ -20,11 +20,3 @@ jobs:
           context: .
           push: true
           tags: imcalvin/mittens:latest
-
-      - name: Deploy to Portainer
-        run: |
-          curl -X POST \
-          -H "Content-Type: application/json" \
-          -H "Authorization: Bearer ${{ env.PORTAINER_API_TOKEN }}" \
-          -d '{"Image": "imcalvin/mittens:latest"}' \
-            https://portainer.bxian03.systems/api/endpoints/${{env.PORTAINER_ENDPOINT_ID}}/stacks/${{env.STACK_NAME}}?endpointId=1
