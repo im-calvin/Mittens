@@ -11,6 +11,30 @@
       "name": "Run translate",
       "request": "launch",
       "type": "node-terminal"
+    },
+    {
+      "command": "npm run setup",
+      "name": "Run setup",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "npm run schedule",
+      "name": "Run schedule",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "npm run holodex",
+      "name": "Run holodex",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "npm run migration",
+      "name": "Run migration",
+      "request": "launch",
+      "type": "node-terminal"
     }
   ]
 }

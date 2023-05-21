@@ -1,5 +1,5 @@
-import { config } from "dotenv-vault-core"
-config()
+import { config } from "dotenv-vault-core";
+config();
 
 export const readEnv = (env: string): string => {
   const realEnv = process.env[env];

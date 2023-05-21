@@ -136,3 +136,6 @@ GOOGLE_APPLICATION_CREDENTIALS.json
 .flaskenv*
 !.env.project
 !.env.vault
+
+database.sqlite
+profiles.json

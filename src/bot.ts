@@ -3,25 +3,17 @@ import MittensClient from "./utils/Client.js";
 import { handleTranslate } from "./translate/Translate.js";
 import Sentry from "@sentry/node";
 import { readEnv } from "./utils/env.js";
-import { ProfilingIntegration } from "@sentry/profiling-node";
+import { init } from "./init.js";
+import { scrape } from "./utils/schedule.js";
 
-Sentry.init({
-  dsn: "https://c9c992d5a347411db99537a0ed2c0094@o4505106964742144.ingest.sentry.io/4505106967691264",
-  integrations: [
-    new ProfilingIntegration(),
-    new Sentry.Integrations.Http({ tracing: true }),
-    ...Sentry.autoDiscoverNodePerformanceMonitoringIntegrations(),
-  ],
-  tracesSampleRate: 1.0,
-  profilesSampleRate: 1.0,
-});
+await init();
 
 const boot = Sentry.startTransaction({
   op: "boot",
   name: "First time launch of Mittens",
 });
 
-const client = new MittensClient({
+export const client = new MittensClient({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.MessageContent,
@@ -30,7 +22,8 @@ const client = new MittensClient({
 });
 
 // on boot
-client.once("ready", () => {
+client.once("ready", async () => {
+  await scrape();
   console.log("もしもし");
 });
 
@@ -59,14 +52,44 @@ client.on(Events.InteractionCreate, async (interaction: BaseInteraction) => {
   transaction.finish();
 });
 
+// handle autocomplete
+client.on(Events.InteractionCreate, async (interaction: BaseInteraction) => {
+  if (!interaction.isAutocomplete()) return;
+  const command = client.commands.get(interaction.commandName);
+
+  if (!command) {
+    console.error(`No command matching ${interaction.commandName} was found.`);
+    return;
+  }
+
+  const transaction = Sentry.startTransaction({
+    op: "autocomplete",
+    name: "Autocomplete interaction",
+  });
+
+  try {
+    await command.autoComplete(interaction);
+  } catch (error) {
+    console.error(`Error executing ${interaction.commandName}`);
+    console.error(error);
+  }
+  transaction.finish();
+});
+
 // handle translating
 client.on("messageCreate", async (message: Message) => {
   const transaction = Sentry.startTransaction({
     op: "msgCreate",
     name: "Message creation interaction",
   });
-  if (message.author.id === client.user!.id) return;
+  if (
+    message.author.id === client.user!.id ||
+    message.author.bot ||
+    message.content.startsWith("::")
+  )
+    return;
   await handleTranslate(message);
+  transaction.finish();
 });
 
 client.login(readEnv("DISCORD_TOKEN"));
