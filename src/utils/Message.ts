@@ -27,7 +27,7 @@ export async function announceStream(
 
   let mentions: string = "";
   for (let user_id of user_ids) {
-    mentions = mentions.concat(roleMention(user_id));
+    mentions = mentions.concat(userMention(user_id));
   }
 
   // get a list of all the users to mention

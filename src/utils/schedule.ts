@@ -117,13 +117,17 @@ export async function scrape() {
         // TODO for egora: is there a better way of optimizing saves and fetches from the database than doing them manually like this (cascade option in save?)
         // if successful:
         // update the video_participants table
+        const participants = [];
         for (const vid_streamer of videoMembers) {
           const db_streamer = await streamerRepo.findOneByOrFail({
             id: vid_streamer.id,
           });
           const participant = new VideoParticipant(db_vid, db_streamer);
+          participants.push(participant);
           await participantRepo.save(participant);
         }
+
+        db_vid.participantStreamers = participants;
 
         // mention users for the 1st ping
         const channelSubs = await getChannelSubs(db_vid);
@@ -145,7 +149,7 @@ export async function scrape() {
     }
   });
 
-  const job = new SimpleIntervalJob({ minutes: intervalTime, runImmediately: false }, task);
+  const job = new SimpleIntervalJob({ minutes: intervalTime, runImmediately: true }, task);
 
   scheduler.addSimpleIntervalJob(job);
   transaction.finish();
@@ -162,12 +166,11 @@ async function getChannelSubs(video: Video): Promise<Map<string, string[]>> {
     name: "Gets all of the discord users that follow the streamers in the video",
   });
 
-  let streamers = [];
-  if (video.participantStreamers === undefined) {
-    streamers = [video.hostStreamer];
-  } else {
-    streamers = [video.hostStreamer, ...video.participantStreamers.map((p) => p.streamer)];
-  }
+  const streamers = [
+    video.hostStreamer,
+    [...new Set(video.participantStreamers.map((p) => p.streamer))], // make participant streamers unique
+  ];
+
   const channelSubs = new Map<string, string[]>();
 
   // iterate over the users and send messages in the respective channels
@@ -182,11 +185,11 @@ async function getChannelSubs(video: Video): Promise<Map<string, string[]>> {
     for (const sub of subscriptions) {
       const channelUsers = channelSubs.get(sub.discordChannelId);
       if (channelUsers === undefined) {
-        channelSubs.set(sub.discordChannelId, [sub.discordUser.id as unknown as string]);
+        channelSubs.set(sub.discordChannelId, [sub.discordUser.id]);
       } else {
         channelSubs.set(sub.discordChannelId, [
           ...channelUsers,
-          sub.discordUser.id as unknown as string,
+          sub.discordUser.id,
         ]);
       }
     }
