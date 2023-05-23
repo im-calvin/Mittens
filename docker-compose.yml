@@ -5,3 +5,6 @@ services:
     restart: always
     volumes:
       - /nfs/mittens/data:/app/data
+  web:
+    env_file:
+      - .env
