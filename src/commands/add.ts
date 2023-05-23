@@ -8,9 +8,7 @@ import { Streamer } from "../db/entity/Streamer.js";
 
 const command = new SlashCommandBuilder()
   .setName("add")
-  .setDescription(
-    "Adds a user to your subscription list in your current discord channel."
-  );
+  .setDescription("Adds a user to your subscription list in your current discord channel.");
 // need to split this up for some reason
 command.addStringOption((option) =>
   option
@@ -44,9 +42,9 @@ const add: CommandData = {
     );
 
     // subscribe the user and err if they are already subscribed
-    const subscribed = await AppDataSource.getRepository(
-      DiscordUserSubscription
-    ).findOneBy(discordUserSub);
+    const subscribed = await AppDataSource.getRepository(DiscordUserSubscription).findOneBy(
+      discordUserSub
+    );
     if (subscribed) {
       await interaction.reply(`You are already subscribed to ${streamer.name}!`);
       return;
