@@ -16,18 +16,38 @@ export interface CommandData {
 
 export const commands: CommandData[] = [add, remove, list];
 
-export async function autoCompleteStreamers(interaction: AutocompleteInteraction) {
+export async function autoCompleteStreamers(interaction: AutocompleteInteraction): Promise<void> {
   const focusedValue = interaction.options.getString("streamer", true).toLowerCase();
 
   if (focusedValue === undefined || focusedValue === "") return;
 
   const streamers = await getDBStreamers();
-  const orgs = await getGroups();
+  const filtered = streamers.filter((streamer) =>
+    streamer.name.toLowerCase().includes(focusedValue)
+  );
+  const response = filtered
+    .map((streamer) => ({
+      name: streamer.name,
+      value: streamer.id,
+    }))
+    .slice(0, 25);
+  await interaction.respond(response);
+}
+
+export async function autoCompleteStreamersGroups(
+  interaction: AutocompleteInteraction
+): Promise<void> {
+  const focusedValue = interaction.options.getString("streamer", true).toLowerCase();
+
+  if (focusedValue === undefined || focusedValue === "") return;
+
+  const streamers = await getDBStreamers();
+  const groups = await getGroups();
   let filtered;
 
   // if the focusedValue is an org, return all streamers in that org
-  if (orgs.map((org) => org.name.toLowerCase().includes(focusedValue))) {
-    filtered = orgs.filter((org) => org.name.includes(focusedValue));
+  if (groups.map((org) => org.name.toLowerCase().includes(focusedValue))) {
+    filtered = groups.filter((org) => org.name.includes(focusedValue));
   } else if (streamers.map((streamer) => streamer.name.toLowerCase().includes(focusedValue))) {
     // if the focusedValue is a streamer, return that streamer
     filtered = streamers.filter((s) => s.name.toLowerCase().includes(focusedValue));
@@ -36,6 +56,7 @@ export async function autoCompleteStreamers(interaction: AutocompleteInteraction
   }
   const response = filtered
     .map((streamer) => ({
+      // streamer can also be "group"
       name: streamer.name,
       value: streamer.id,
     }))
