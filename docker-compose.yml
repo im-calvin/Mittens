@@ -6,5 +6,5 @@ services:
     volumes:
       - /nfs/mittens/data:/app/data
   web:
-    env_file:
-      - .env
+    environment:
+      - DOTENV_KEY = ${DOTENV_KEY}
