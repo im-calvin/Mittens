@@ -170,7 +170,9 @@ async function getChannelSubs(video: Video): Promise<Map<string, string[]>> {
 
   const streamers = [
     video.hostStreamer,
-    [...new Set(video.participantStreamers.map((p) => p.streamer))], // make participant streamers unique
+    // get all unique participant streamers
+    
+    ...[...new Set(video.participantStreamers.map((p) => p.streamer))], // make participant streamers unique
   ];
 
   const channelSubs = new Map<string, string[]>();
