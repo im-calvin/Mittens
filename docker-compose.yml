@@ -6,4 +6,4 @@ services:
     volumes:
       - /nfs/mittens/data:/app/data
     environment:
-      - DOTENV_KEY = ${DOTENV_KEY}
+      DOTENV_KEY: ${DOTENV_KEY}
