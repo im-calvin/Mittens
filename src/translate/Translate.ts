@@ -5,7 +5,7 @@ import Sentry from "@sentry/node";
 import { targetConfidence, targetLanguage } from "../constants.js";
 
 const translationClient = new v3.TranslationServiceClient({
-  credentials: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS!),
+  credentials: JSON.parse(readEnv("GOOGLE_APPLICATION_CREDENTIALS")),
 });
 const parent = translationClient.locationPath(readEnv("GOOGLE_PROJECT_ID"), "global");
 
@@ -71,8 +71,7 @@ async function detectLanguage(text: string): Promise<DetectedLanguage> {
   transaction.finish();
   return {
     confidence:
-      language.confidence > targetConfidence &&
-      targetLanguage.includes(language.languageCode),
+      language.confidence > targetConfidence && targetLanguage.includes(language.languageCode),
     language: language.languageCode,
   };
 }
@@ -84,10 +83,7 @@ async function detectLanguage(text: string): Promise<DetectedLanguage> {
 export async function handleTranslate(message: Message) {
   const detectedLanguage = await detectLanguage(message.content);
   if (detectedLanguage.confidence) {
-    const translatedText = await translateText(
-      message.content,
-      detectedLanguage.language
-    );
+    const translatedText = await translateText(message.content, detectedLanguage.language);
     await message.channel.send(translatedText);
   }
 }

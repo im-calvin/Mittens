@@ -118,13 +118,15 @@ export async function scrape() {
         // if successful:
         // update the video_participants table
         const participants = [];
-        for (const vid_streamer of videoMembers) {
-          const db_streamer = await streamerRepo.findOneByOrFail({
-            id: vid_streamer.id,
-          });
-          const participant = new VideoParticipant(db_vid, db_streamer);
-          participants.push(participant);
-          await participantRepo.save(participant);
+        if (video.mentions !== undefined) {
+          for (const vid_streamer of video.mentions) {
+            const db_streamer = await streamerRepo.findOneByOrFail({
+              id: vid_streamer.id,
+            });
+            const participant = new VideoParticipant(db_vid, db_streamer);
+            participants.push(participant);
+            await participantRepo.save(participant);
+          }
         }
 
         db_vid.participantStreamers = participants;
@@ -187,10 +189,7 @@ async function getChannelSubs(video: Video): Promise<Map<string, string[]>> {
       if (channelUsers === undefined) {
         channelSubs.set(sub.discordChannelId, [sub.discordUser.id]);
       } else {
-        channelSubs.set(sub.discordChannelId, [
-          ...channelUsers,
-          sub.discordUser.id,
-        ]);
+        channelSubs.set(sub.discordChannelId, [...channelUsers, sub.discordUser.id]);
       }
     }
   }
