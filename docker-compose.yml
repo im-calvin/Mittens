@@ -5,6 +5,5 @@ services:
     restart: always
     volumes:
       - /nfs/mittens/data:/app/data
-  web:
     environment:
       - DOTENV_KEY = ${DOTENV_KEY}
