@@ -25,3 +25,7 @@ jobs:
         with:
           push: true
           tags: imcalvin/mittens:latest
+      - name: POST to Portainer
+        uses: distributhor/workflow-webhook@v3
+        env:
+          webhook_url: ${{ secrets.PORTAINER_WEBHOOK_URL }}
