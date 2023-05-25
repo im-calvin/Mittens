@@ -7,6 +7,7 @@ import add from "../commands/add.js";
 import { getDBStreamers, getGroups } from "../constants.js";
 import remove from "../commands/remove.js";
 import list from "../commands/list.js";
+import schedule from "../commands/schedule.js";
 
 export interface CommandData {
   command: SlashCommandBuilder;
@@ -14,7 +15,7 @@ export interface CommandData {
   execute: (interaction: ChatInputCommandInteraction) => void | Promise<void>;
 }
 
-export const commands: CommandData[] = [add, remove, list];
+export const commands: CommandData[] = [add, remove, list, schedule];
 
 export async function autoCompleteStreamers(interaction: AutocompleteInteraction): Promise<void> {
   const focusedValue = interaction.options.getString("streamer", true).toLowerCase();
@@ -37,23 +38,27 @@ export async function autoCompleteStreamers(interaction: AutocompleteInteraction
 export async function autoCompleteStreamersGroups(
   interaction: AutocompleteInteraction
 ): Promise<void> {
-  const focusedValue = interaction.options.getString("streamer", true).toLowerCase();
+  const focusedValue = interaction.options.getFocused(true).name.toLowerCase();
 
   if (focusedValue === undefined || focusedValue === "") return;
 
-  const streamers = await getDBStreamers();
-  const groups = await getGroups();
-  let filtered;
+  let filtered: any[] = [];
 
-  // if the focusedValue is an org, return all streamers in that org
-  if (groups.map((org) => org.name.toLowerCase().includes(focusedValue))) {
-    filtered = groups.filter((org) => org.name.includes(focusedValue));
-  } else if (streamers.map((streamer) => streamer.name.toLowerCase().includes(focusedValue))) {
-    // if the focusedValue is a streamer, return that streamer
-    filtered = streamers.filter((s) => s.name.toLowerCase().includes(focusedValue));
-  } else {
-    throw new Error("No streamer or org found");
+  if (focusedValue === "streamer") {
+    const streamers = await getDBStreamers();
+    if (streamers.map((streamer) => streamer.name.toLowerCase().includes(focusedValue))) {
+      // if the focusedValue is a streamer, return that streamer
+      filtered = streamers.filter((s) => s.name.toLowerCase().includes(focusedValue));
+    }
+  } else if (focusedValue === "group") {
+    const groups = await getGroups();
+    if (groups.map((org) => org.name.toLowerCase().includes(focusedValue))) {
+      filtered = groups.filter((org) => org.name.includes(focusedValue));
+    }
   }
+
+  if (filtered.length === 0) throw new Error("No streamers or groups found");
+
   const response = filtered
     .map((streamer) => ({
       // streamer can also be "group"
