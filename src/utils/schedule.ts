@@ -83,6 +83,7 @@ export async function scrape() {
       }
       // videoMembers is the Video.members field in the db
       let videoMembers: HolodexChannel[] = [];
+      // let participants: VideoParticipant[] = [];
 
       // add the mentioned members (if it exists) to the videoMembers arr
       if (video.mentions !== undefined) {
@@ -113,7 +114,7 @@ export async function scrape() {
         // try to save, if it goes through then
         // 1. schedule the message & mention the users for the 1st ping
         // 3. add to the db
-        await videoRepo.save(db_vid);
+
         // TODO for egora: is there a better way of optimizing saves and fetches from the database than doing them manually like this (cascade option in save?)
         // if successful:
         // update the video_participants table
@@ -125,11 +126,12 @@ export async function scrape() {
             });
             const participant = new VideoParticipant(db_vid, db_streamer);
             participants.push(participant);
-            await participantRepo.save(participant);
+            // await participantRepo.save(participant);
           }
         }
-
         db_vid.participantStreamers = participants;
+
+        await videoRepo.save(db_vid);
 
         // mention users for the 1st ping
         const channelSubs = await getChannelSubs(db_vid);
@@ -171,7 +173,6 @@ async function getChannelSubs(video: Video): Promise<Map<string, string[]>> {
   const streamers = [
     video.hostStreamer,
     // get all unique participant streamers
-    
     ...[...new Set(video.participantStreamers.map((p) => p.streamer))], // make participant streamers unique
   ];
 
@@ -185,14 +186,9 @@ async function getChannelSubs(video: Video): Promise<Map<string, string[]>> {
         streamer: streamer,
       },
     });
-    // TODO check the casting
     for (const sub of subscriptions) {
-      const channelUsers = channelSubs.get(sub.discordChannelId);
-      if (channelUsers === undefined) {
-        channelSubs.set(sub.discordChannelId, [sub.discordUser.id]);
-      } else {
-        channelSubs.set(sub.discordChannelId, [...channelUsers, sub.discordUser.id]);
-      }
+      const channelUsers = channelSubs.get(sub.discordChannelId) || [];
+      channelSubs.set(sub.discordChannelId, [...channelUsers, sub.discordUser.id]);
     }
   }
   transaction.finish();

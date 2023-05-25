@@ -1,23 +1,10 @@
-import {
-  Entity,
-  PrimaryColumn,
-  Column,
-  ManyToOne,
-  JoinColumn,
-  Relation,
-  OneToMany,
-} from "typeorm";
+import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, Relation, OneToMany } from "typeorm";
 import { Streamer } from "./Streamer.js";
 import { VideoParticipant } from "./VideoParticipant.js";
 
 @Entity({ name: "videos" })
 export class Video {
-  constructor(
-    id: string,
-    scheduledTime: Date,
-    title: string,
-    hostStreamer: Relation<Streamer>
-  ) {
+  constructor(id: string, scheduledTime: Date, title: string, hostStreamer: Relation<Streamer>) {
     this.id = id;
     this.scheduledTime = scheduledTime;
     this.title = title;

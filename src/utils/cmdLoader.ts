@@ -38,32 +38,30 @@ export async function autoCompleteStreamers(interaction: AutocompleteInteraction
 export async function autoCompleteStreamersGroups(
   interaction: AutocompleteInteraction
 ): Promise<void> {
-  const focusedValue = interaction.options.getFocused(true).name.toLowerCase();
+  const focusedValue = interaction.options.getFocused(true);
 
-  if (focusedValue === undefined || focusedValue === "") return;
+  if (focusedValue === undefined || focusedValue.value === "") return;
 
   let filtered: any[] = [];
 
-  if (focusedValue === "streamer") {
+  if (focusedValue.name === "streamer") {
     const streamers = await getDBStreamers();
-    if (streamers.map((streamer) => streamer.name.toLowerCase().includes(focusedValue))) {
+    if (streamers.map((streamer) => streamer.name.toLowerCase().includes(focusedValue.value))) {
       // if the focusedValue is a streamer, return that streamer
-      filtered = streamers.filter((s) => s.name.toLowerCase().includes(focusedValue));
+      filtered = streamers.filter((s) => s.name.toLowerCase().includes(focusedValue.value));
     }
-  } else if (focusedValue === "group") {
+  } else if (focusedValue.name === "group") {
     const groups = await getGroups();
-    if (groups.map((org) => org.name.toLowerCase().includes(focusedValue))) {
-      filtered = groups.filter((org) => org.name.includes(focusedValue));
+    if (groups.map((group) => group.name.toLowerCase().includes(focusedValue.value))) {
+      filtered = groups.filter((group) => group.name.toLowerCase().includes(focusedValue.value));
     }
   }
-
-  if (filtered.length === 0) throw new Error("No streamers or groups found");
 
   const response = filtered
     .map((streamer) => ({
       // streamer can also be "group"
       name: streamer.name,
-      value: streamer.id,
+      value: String(streamer.id), // need to cast or else discord.js complains
     }))
     .slice(0, 25);
   await interaction.respond(response);

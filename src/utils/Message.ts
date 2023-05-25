@@ -1,4 +1,10 @@
-import { TextChannel, userMention, roleMention, time } from "discord.js";
+import {
+  TextChannel,
+  userMention,
+  time,
+  EmbedBuilder,
+  ChatInputCommandInteraction,
+} from "discord.js";
 import { Video } from "../db/entity/Video.js";
 import Sentry from "@sentry/node";
 import { client } from "../bot.js";
@@ -39,4 +45,22 @@ export async function announceStream(
     ${mentions}
   `);
   transaction.finish();
+}
+
+export async function embedScheduleFormatter(
+  fields: DataField[],
+  interaction: ChatInputCommandInteraction
+) {
+  const embed = new EmbedBuilder()
+    .setColor(0xfcc174)
+    .setTitle("Schedule")
+    .addFields(fields.slice(0, 25))
+    .setTimestamp();
+
+  await interaction.reply({ embeds: [embed] });
+}
+
+export interface DataField {
+  name: string;
+  value: string;
 }
