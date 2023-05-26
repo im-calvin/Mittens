@@ -42,20 +42,16 @@ export async function autoCompleteStreamersGroups(
 
   if (focusedValue === undefined || focusedValue.value === "") return;
 
-  let filtered: any[] = [];
-
+  let target;
   if (focusedValue.name === "streamer") {
-    const streamers = await getDBStreamers();
-    if (streamers.map((streamer) => streamer.name.toLowerCase().includes(focusedValue.value))) {
-      // if the focusedValue is a streamer, return that streamer
-      filtered = streamers.filter((s) => s.name.toLowerCase().includes(focusedValue.value));
-    }
+    target = await getDBStreamers();
   } else if (focusedValue.name === "group") {
-    const groups = await getGroups();
-    if (groups.map((group) => group.name.toLowerCase().includes(focusedValue.value))) {
-      filtered = groups.filter((group) => group.name.toLowerCase().includes(focusedValue.value));
-    }
+    target = await getGroups();
   }
+
+  if (target === undefined) return; // the focusedValue was neither streamer nor group
+
+  const filtered = target.filter((t) => t.name.toLowerCase().includes(focusedValue.value));
 
   const response = filtered
     .map((streamer) => ({

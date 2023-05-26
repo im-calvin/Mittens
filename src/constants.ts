@@ -28,9 +28,6 @@ export async function getGroups(): Promise<Group[]> {
     name: "Gets all of the groups in the database",
   });
   const groups = await AppDataSource.getRepository(Group).find();
-  if (groups === undefined) {
-    throw new Error("Group table is empty");
-  }
 
   transaction.finish();
   return groups;
