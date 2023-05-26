@@ -1,4 +1,11 @@
-import { GatewayIntentBits, Events, BaseInteraction, Message } from "discord.js";
+import {
+  GatewayIntentBits,
+  Events,
+  BaseInteraction,
+  Message,
+  Awaitable,
+  PartialMessage,
+} from "discord.js";
 import MittensClient from "./utils/Client.js";
 import { handleTranslate } from "./translate/Translate.js";
 import Sentry from "@sentry/node";
@@ -77,7 +84,7 @@ client.on(Events.InteractionCreate, async (interaction: BaseInteraction) => {
 });
 
 // handle translating
-client.on("messageCreate", async (message: Message) => {
+client.on(Events.MessageCreate, async (message: Message) => {
   const transaction = Sentry.startTransaction({
     op: "msgCreate",
     name: "Message creation interaction",
@@ -91,6 +98,34 @@ client.on("messageCreate", async (message: Message) => {
   await handleTranslate(message);
   transaction.finish();
 });
+
+// handle translating edits
+client.on(
+  Events.MessageUpdate,
+  async (
+    oldMessage: Message<boolean> | PartialMessage,
+    newMessage: Message<boolean> | PartialMessage
+  ) => {
+    const transaction = Sentry.startTransaction({
+      op: "msgUpdate",
+      name: "Message update interaction",
+    });
+
+    if (oldMessage.partial || newMessage.partial) {
+      return; // partials are not enabled
+    }
+
+    if (
+      oldMessage.author.id === client.user!.id ||
+      oldMessage.author.bot ||
+      oldMessage.content.startsWith("::")
+    )
+      return;
+
+    await handleTranslate(newMessage);
+    transaction.finish();
+  }
+);
 
 client.login(readEnv("DISCORD_TOKEN"));
 boot.finish();
