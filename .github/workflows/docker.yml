@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    types: [opened]
 
 jobs:
   build:
@@ -29,4 +27,3 @@ jobs:
         uses: distributhor/workflow-webhook@v3
         env:
           webhook_url: ${{ secrets.PORTAINER_WEBHOOK_URL }}
-          # webhook_secret: ${{ secrets.PORTAINER_WEBHOOK_SECRET }}
