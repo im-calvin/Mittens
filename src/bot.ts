@@ -5,6 +5,7 @@ import {
   Message,
   Awaitable,
   PartialMessage,
+  MessageManager,
 } from "discord.js";
 import MittensClient from "./utils/Client.js";
 import { handleTranslate } from "./translate/Translate.js";
@@ -95,7 +96,12 @@ client.on(Events.MessageCreate, async (message: Message) => {
     message.content.startsWith("::")
   )
     return;
-  await handleTranslate(message);
+  const translatedText = await handleTranslate(message);
+
+  if (translatedText) {
+    const myMessage = await message.channel.send(translatedText);
+    client.messageCache.set(message.id, myMessage.id);
+  }
   transaction.finish();
 });
 
@@ -122,7 +128,13 @@ client.on(
     )
       return;
 
-    await handleTranslate(newMessage);
+    const translatedText = await handleTranslate(newMessage);
+    if (translatedText) {
+      const myOldMessageId = client.messageCache.get(oldMessage.id);
+      if (myOldMessageId)
+        // fetch the old message that I sent and edit it
+        (await oldMessage.channel.messages.fetch(myOldMessageId)).edit(translatedText);
+    }
     transaction.finish();
   }
 );
