@@ -26,7 +26,7 @@ command.addStringOption((option) =>
 );
 
 const schedule: CommandData = {
-  command: command,
+  command,
   autoComplete: autoCompleteStreamersGroups,
   execute: async (interaction) => {
     // decide if it was a streamer or a group or neither
@@ -45,7 +45,7 @@ const schedule: CommandData = {
         },
         relations: ["hostStreamer"],
       });
-      const embedFields: DataField[] = videos.map((video) => ({
+      const embedFields = videos.map((video) => ({
         name: `${time(video.scheduledTime, "f")} / ${time(video.scheduledTime, "R")}`,
         value: `${inlineCode(video.hostStreamer.name)}: ${hyperlink(video.title, video.id)}`,
       }));
@@ -86,7 +86,7 @@ const schedule: CommandData = {
         [streamer.id]
       );
 
-      const embedFields: DataField[] = await Promise.all(
+      const embedFields = await Promise.all(
         videos.map(async (video) => {
           const hostStreamer = await AppDataSource.getRepository(Streamer).findOneByOrFail({
             id: video.host_streamer_id,
@@ -125,7 +125,7 @@ const schedule: CommandData = {
         [group.id]
       );
 
-      const embedFields: DataField[] = await Promise.all(
+      const embedFields = await Promise.all(
         videos.map(async (video) => {
           const hostStreamer = await AppDataSource.getRepository(Streamer).findOneByOrFail({
             id: video.host_streamer_id,
