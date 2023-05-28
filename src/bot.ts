@@ -1,4 +1,12 @@
-import { GatewayIntentBits, Events, BaseInteraction, Message } from "discord.js";
+import {
+  GatewayIntentBits,
+  Events,
+  BaseInteraction,
+  Message,
+  Awaitable,
+  PartialMessage,
+  MessageManager,
+} from "discord.js";
 import MittensClient from "./utils/Client.js";
 import { handleTranslate } from "./translate/Translate.js";
 import Sentry from "@sentry/node";
@@ -77,7 +85,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 });
 
 // handle translating
-client.on("messageCreate", async (message) => {
+client.on(Events.MessageCreate, async (message: Message) => {
   const transaction = Sentry.startTransaction({
     op: "msgCreate",
     name: "Message creation interaction",
@@ -88,9 +96,48 @@ client.on("messageCreate", async (message) => {
     message.content.startsWith("::")
   )
     return;
-  await handleTranslate(message);
+  const translatedText = await handleTranslate(message);
+
+  if (translatedText) {
+    const myMessage = await message.channel.send(translatedText);
+    client.messageCache.set(message.id, myMessage.id);
+  }
   transaction.finish();
 });
+
+// handle translating edits
+client.on(
+  Events.MessageUpdate,
+  async (
+    oldMessage: Message<boolean> | PartialMessage,
+    newMessage: Message<boolean> | PartialMessage
+  ) => {
+    const transaction = Sentry.startTransaction({
+      op: "msgUpdate",
+      name: "Message update interaction",
+    });
+
+    if (oldMessage.partial || newMessage.partial) {
+      return; // partials are not enabled
+    }
+
+    if (
+      oldMessage.author.id === client.user!.id ||
+      oldMessage.author.bot ||
+      oldMessage.content.startsWith("::")
+    )
+      return;
+
+    const translatedText = await handleTranslate(newMessage);
+    if (translatedText) {
+      const myOldMessageId = client.messageCache.get(oldMessage.id);
+      if (myOldMessageId)
+        // fetch the old message that I sent and edit it
+        (await oldMessage.channel.messages.fetch(myOldMessageId)).edit(translatedText);
+    }
+    transaction.finish();
+  }
+);
 
 client.login(readEnv("DISCORD_TOKEN"));
 boot.finish();

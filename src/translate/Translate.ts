@@ -80,10 +80,11 @@ async function detectLanguage(text: string): Promise<DetectedLanguage> {
  * Handles the translation of a message
  * @param message the message object of the message
  */
-export async function handleTranslate(message: Message) {
+export async function handleTranslate(message: Message): Promise<string | null> {
   const detectedLanguage = await detectLanguage(message.content);
   if (detectedLanguage.confidence) {
     const translatedText = await translateText(message.content, detectedLanguage.language);
-    await message.channel.send(translatedText);
+    return translatedText;
   }
+  return null;
 }
