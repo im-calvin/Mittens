@@ -21,7 +21,7 @@ command.addStringOption((option) =>
 );
 
 const remove: CommandData = {
-  command: command,
+  command,
   autoComplete: autoCompleteStreamers,
   execute: async (interaction) => {
     const discordUser = new DiscordUser(interaction.user.id);

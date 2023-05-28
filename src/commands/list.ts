@@ -13,7 +13,7 @@ const command = new SlashCommandBuilder()
   );
 
 const list: CommandData = {
-  command: command,
+  command,
   autoComplete: () => {}, // TODO will this even ever get called since the command isn't registered as autocomplete?
   execute: async (interaction) => {
     const discordUser = await AppDataSource.getRepository(DiscordUser).findOne({

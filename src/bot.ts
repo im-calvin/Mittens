@@ -36,7 +36,7 @@ client.once("ready", async () => {
 });
 
 // handle slash commands
-client.on(Events.InteractionCreate, async (interaction: BaseInteraction) => {
+client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return; // not a slash command
   const transaction = Sentry.startTransaction({
     op: "slash",
@@ -61,7 +61,7 @@ client.on(Events.InteractionCreate, async (interaction: BaseInteraction) => {
 });
 
 // handle autocomplete
-client.on(Events.InteractionCreate, async (interaction: BaseInteraction) => {
+client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isAutocomplete()) return;
   const command = client.commands.get(interaction.commandName);
 
