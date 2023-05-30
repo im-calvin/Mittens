@@ -137,5 +137,6 @@ GOOGLE_APPLICATION_CREDENTIALS.json
 !.env.project
 !.env.vault
 
+data*
 database.sqlite
 profiles.json

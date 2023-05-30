@@ -1,16 +1,9 @@
-import {
-  Entity,
-  PrimaryColumn,
-  Column,
-  ManyToOne,
-  JoinColumn,
-  OneToMany,
-  Relation,
-} from "typeorm";
+import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, OneToMany, Relation } from "typeorm";
 import { Video } from "./Video.js";
 import { Group } from "./Group.js";
 import { DiscordUserSubscription } from "./DiscordUserSubscription.js";
 import { VideoParticipant } from "./VideoParticipant.js";
+import { Language } from "./Language.js";
 
 @Entity({ name: "streamers" })
 export class Streamer {
@@ -43,4 +36,8 @@ export class Streamer {
 
   @OneToMany(() => VideoParticipant, (participant) => participant.streamer)
   videoParticipant: Relation<VideoParticipant[]>;
+
+  @ManyToOne(() => Language, (language) => language.id, { eager: true })
+  @JoinColumn({ name: "language_id", referencedColumnName: "id" })
+  language: Relation<Language>;
 }
