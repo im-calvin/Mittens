@@ -58,11 +58,12 @@ const schedule: CommandData = {
         },
         relations: ["hostStreamer"],
       });
+
       const embedFields = videos.map((video) => ({
         name: `${time(video.scheduledTime, "f")} / ${time(video.scheduledTime, "R")}`,
         value: `${inlineCode(video.hostStreamer.name)}: ${hyperlink(video.title, video.id)}`,
       }));
-      await embedScheduleFormatter(embedFields, interaction);
+      // await embedScheduleFormatter(embedFields, interaction);
       return;
     } else if (streamerId !== null) {
       const streamer = await AppDataSource.getRepository(Streamer).findOneByOrFail({
@@ -133,7 +134,7 @@ const schedule: CommandData = {
         })
       );
 
-      await embedScheduleFormatter(embedFields, interaction);
+      // await embedScheduleFormatter(embedFields, interaction);
       return;
     } else if (groupId !== null) {
       const group = await AppDataSource.getRepository(Group).findOneByOrFail({
@@ -172,34 +173,46 @@ const schedule: CommandData = {
         })
       );
 
-      await embedScheduleFormatter(embedFields, interaction);
+      // await embedScheduleFormatter(embedFields, interaction);
       return;
     } else if (languageId !== null) {
-      const language = await AppDataSource.getRepository(Language).findOneBy({
-        id: Number(languageId), // obligatory cast because discord.js requires value to be a string-type
-      });
-      if (language === null) return;
-      const streamers = await getStreamersByLanguage(language); // all of the streamers related to a particular language
-
       // all of the videos related to the language
       const videos = await AppDataSource.getRepository(Video)
-        .createQueryBuilder("video")
-        .leftJoin("video.hostStreamer", "hostStreamer", "video.id = hostStreamer.video.id")
-        .leftJoin(
-          "video.participantStreamer",
-          "participantStreamer",
-          "video.id = participantStreamer.video.id"
+        .createQueryBuilder("videos")
+        .innerJoin(
+          Streamer,
+          "participantStreamers",
+          "participantStreamers.id IN (SELECT vp.participant_streamer_id FROM video_participants vp WHERE vp.video_id = videos.id)"
         )
-        .where("video.scheduledTime > :date", { date: new Date() })
-        .andWhere("video.scheduledTime < :date", {
+        .innerJoin(Streamer, "hostStreamers", "videos.host_streamer_id = hostStreamers.id")
+        .leftJoinAndSelect("videos.participantStreamers", "ps")
+        .leftJoinAndSelect("videos.hostStreamer", "hs")
+        .where("videos.scheduledTime > :date", { date: new Date() })
+        .andWhere("videos.scheduledTime < :date", {
           date: new Date().setDate(new Date().getDate() + 10), // get current date + 10 days
         })
         .andWhere(
-          "hostStreamer.language.id = :languageId OR participantStreamer.language.id = :languageId",
-          { languageId: language.id }
+          "hostStreamers.language_id = :languageId OR participantStreamers.language_id = :languageId",
+          { languageId: languageId }
         )
-        .orderBy("video.scheduledTime", "ASC")
+        .orderBy("videos.scheduledTime", "ASC")
         .getMany();
+
+      const embedFields = await Promise.all(
+        videos.map(async (video) => {
+          const hostStreamer = await AppDataSource.getRepository(Streamer).findOneByOrFail({
+            id: video.hostStreamer.id,
+          });
+          return {
+            name: `${time(new Date(video.scheduledTime), "f")} / ${time(
+              new Date(video.scheduledTime),
+              "R"
+            )}`,
+            value: `${inlineCode(hostStreamer.name)}: ${hyperlink(video.title, video.id)}`,
+          };
+        })
+      );
+
       console.log(videos);
     }
     throw new Error("Not implemented");
