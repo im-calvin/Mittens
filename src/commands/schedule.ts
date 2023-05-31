@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, time, hyperlink, inlineCode } from "discord.js";
-import { CommandData, autoCompleteStreamersGroups } from "../utils/cmdLoader.js";
+import { CommandData, autoCompleteStreamersGroupsLangs } from "../utils/cmdLoader.js";
 import { DiscordUser } from "../db/entity/DiscordUser.js";
 import { DiscordUserSubscription } from "../db/entity/DiscordUserSubscription.js";
 import { AppDataSource } from "../db/data-source.js";
@@ -8,6 +8,8 @@ import { Group } from "../db/entity/Group.js";
 import { Video } from "../db/entity/Video.js";
 import { DataField, embedScheduleFormatter } from "../utils/Message.js";
 import { MoreThan, Raw } from "typeorm";
+import { Language } from "../db/entity/Language.js";
+import { getStreamersByLanguage } from "../constants.js";
 
 const command = new SlashCommandBuilder()
   .setName("schedule")
@@ -24,6 +26,12 @@ command.addStringOption((option) =>
     .setDescription("The group to find the upcoming streams for")
     .setAutocomplete(true)
 );
+command.addStringOption((option) =>
+  option
+    .setName("language")
+    .setDescription("The specific org + language to find upcoming streams for")
+    .setAutocomplete(true)
+);
 
 type VideoData = Pick<Video, "id" | "title" | "scheduledTime"> & {
   hostStreamerId: Video["hostStreamer"]["id"];
@@ -31,12 +39,13 @@ type VideoData = Pick<Video, "id" | "title" | "scheduledTime"> & {
 
 const schedule: CommandData = {
   command,
-  autoComplete: autoCompleteStreamersGroups,
+  autoComplete: autoCompleteStreamersGroupsLangs,
   execute: async (interaction) => {
     // decide if it was a streamer or a group or neither
-    const streamerName = interaction.options.getString("streamer");
-    const groupName = interaction.options.getString("group");
-    const none = streamerName || groupName;
+    const streamerId = interaction.options.getString("streamer");
+    const groupId = interaction.options.getString("group");
+    const languageId = interaction.options.getString("language");
+    const none = streamerId || groupId || languageId;
 
     if (none === null) {
       // show schedule for all upcoming
@@ -55,9 +64,9 @@ const schedule: CommandData = {
       }));
       await embedScheduleFormatter(embedFields, interaction);
       return;
-    } else if (streamerName !== null) {
+    } else if (streamerId !== null) {
       const streamer = await AppDataSource.getRepository(Streamer).findOneByOrFail({
-        id: streamerName,
+        id: streamerId,
       });
 
       // TODO if I am able ot use the query builder then I can use types for the messaging, but video_participants it not a column?
@@ -126,9 +135,9 @@ const schedule: CommandData = {
 
       await embedScheduleFormatter(embedFields, interaction);
       return;
-    } else if (groupName !== null) {
+    } else if (groupId !== null) {
       const group = await AppDataSource.getRepository(Group).findOneByOrFail({
-        id: Number(groupName), // the value from the autoComplete has to be casted to a string and hence it has to be casted back to a number here
+        id: Number(groupId), // the value from the autoComplete has to be casted to a string and hence it has to be casted back to a number here
       });
       const videos = (await AppDataSource.query(
         `
@@ -165,6 +174,33 @@ const schedule: CommandData = {
 
       await embedScheduleFormatter(embedFields, interaction);
       return;
+    } else if (languageId !== null) {
+      const language = await AppDataSource.getRepository(Language).findOneBy({
+        id: Number(languageId), // obligatory cast because discord.js requires value to be a string-type
+      });
+      if (language === null) return;
+      const streamers = await getStreamersByLanguage(language); // all of the streamers related to a particular language
+
+      // all of the videos related to the language
+      const videos = await AppDataSource.getRepository(Video)
+        .createQueryBuilder("video")
+        .leftJoin("video.hostStreamer", "hostStreamer", "video.id = hostStreamer.video.id")
+        .leftJoin(
+          "video.participantStreamer",
+          "participantStreamer",
+          "video.id = participantStreamer.video.id"
+        )
+        .where("video.scheduledTime > :date", { date: new Date() })
+        .andWhere("video.scheduledTime < :date", {
+          date: new Date().setDate(new Date().getDate() + 10), // get current date + 10 days
+        })
+        .andWhere(
+          "hostStreamer.language.id = :languageId OR participantStreamer.language.id = :languageId",
+          { languageId: language.id }
+        )
+        .orderBy("video.scheduledTime", "ASC")
+        .getMany();
+      console.log(videos);
     }
     throw new Error("Not implemented");
   },

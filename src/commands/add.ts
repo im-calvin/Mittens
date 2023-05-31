@@ -5,6 +5,7 @@ import { DiscordUser } from "../db/entity/DiscordUser.js";
 import { DiscordUserSubscription } from "../db/entity/DiscordUserSubscription.js";
 import { AppDataSource } from "../db/data-source.js";
 import { Streamer } from "../db/entity/Streamer.js";
+import { Video } from "../db/entity/Video.js";
 
 const command = new SlashCommandBuilder()
   .setName("add")
@@ -22,6 +23,7 @@ const add: CommandData = {
   command,
   autoComplete: autoCompleteStreamers,
   execute: async (interaction) => {
+    logEntityRelations();
     const discordUser = new DiscordUser(interaction.user.id);
     await AppDataSource.getRepository(DiscordUser).upsert(discordUser, ["id"]);
 
@@ -56,3 +58,11 @@ const add: CommandData = {
 };
 
 export default add;
+
+async function logEntityRelations() {
+  const videoRepository = AppDataSource.getRepository(Video);
+  const entityMetadata = videoRepository.metadata;
+
+  const relations = entityMetadata.relations;
+  console.log(relations);
+}
