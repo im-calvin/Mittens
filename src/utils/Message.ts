@@ -56,12 +56,11 @@ export async function embedScheduleFormatter(
   videos: Video[],
   interaction: ChatInputCommandInteraction
 ) {
-  const embedFields = await Promise.all(
-    videos.map((video) => ({
-      name: `${time(video.scheduledTime, "f")} / ${time(video.scheduledTime, "R")}`,
-      value: `${inlineCode(video.hostStreamer.name)}: ${hyperlink(video.title, video.id)}`,
-    }))
-  );
+  const embedFields = videos.map((video) => ({
+    name: `${time(video.scheduledTime, "f")} / ${time(video.scheduledTime, "R")}`,
+    value: `${inlineCode(video.hostStreamer.name)}: ${hyperlink(video.title, video.id)}`,
+  }));
+
   const embed = new EmbedBuilder()
     .setColor(0xfcc174)
     .setTitle("Schedule")

@@ -61,3 +61,11 @@ export async function getLanguages(): Promise<Language[]> {
   transaction.finish();
   return languages;
 }
+
+export function getDateTenDaysAhead(): Date {
+  const currentDate = new Date();
+  const tenDaysAhead = new Date();
+  tenDaysAhead.setDate(currentDate.getDate() + 10);
+
+  return tenDaysAhead;
+}

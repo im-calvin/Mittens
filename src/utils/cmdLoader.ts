@@ -4,13 +4,12 @@ import {
   AutocompleteInteraction,
 } from "discord.js";
 import add from "../commands/add.js";
-import { getDBStreamers, getGroups, getLanguages, getStreamersByLanguage } from "../constants.js";
+import { getDBStreamers, getGroups, getLanguages } from "../constants.js";
 import remove from "../commands/remove.js";
 import list from "../commands/list.js";
 import schedule from "../commands/schedule.js";
 import { Group } from "../db/entity/Group.js";
 import { Streamer } from "../db/entity/Streamer.js";
-import { AppDataSource } from "../db/data-source.js";
 import { Language } from "../db/entity/Language.js";
 
 export interface CommandData {
