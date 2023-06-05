@@ -139,3 +139,4 @@ GOOGLE_APPLICATION_CREDENTIALS.json
 
 database.sqlite
 profiles.json
+backup.sqlite
