@@ -49,7 +49,7 @@ declare global {
 
     // カスタム
     filter<T, U, V>(
-      predicate: (value: T | U | V, index: number, array: T[]) => unknown,
+      predicate: (value: T | U | V, index: number, array: T[] | U[] | V[]) => unknown,
       thisArg?: any
     ): T[] | U[] | V[];
   }

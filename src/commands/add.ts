@@ -23,7 +23,6 @@ const add: CommandData = {
   command,
   autoComplete: autoCompleteStreamers,
   execute: async (interaction) => {
-    logEntityRelations();
     const discordUser = new DiscordUser(interaction.user.id);
     await AppDataSource.getRepository(DiscordUser).upsert(discordUser, ["id"]);
 
@@ -58,11 +57,3 @@ const add: CommandData = {
 };
 
 export default add;
-
-async function logEntityRelations() {
-  const videoRepository = AppDataSource.getRepository(Video);
-  const entityMetadata = videoRepository.metadata;
-
-  const relations = entityMetadata.relations;
-  console.log(relations);
-}

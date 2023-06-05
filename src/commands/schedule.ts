@@ -41,9 +41,8 @@ const schedule: CommandData = {
     const streamerId = interaction.options.getString("streamer");
     const groupId = interaction.options.getString("group");
     const languageId = interaction.options.getString("language");
-    const none = streamerId || groupId || languageId;
 
-    if (none === null) {
+    if (!(streamerId || groupId || languageId)) {
       // show schedule for all upcoming
       const videos = await AppDataSource.getRepository(Video).find({
         where: [
