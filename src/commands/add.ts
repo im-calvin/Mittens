@@ -5,7 +5,6 @@ import { DiscordUser } from "../db/entity/DiscordUser.js";
 import { DiscordUserSubscription } from "../db/entity/DiscordUserSubscription.js";
 import { AppDataSource } from "../db/data-source.js";
 import { Streamer } from "../db/entity/Streamer.js";
-import { Video } from "../db/entity/Video.js";
 
 const command = new SlashCommandBuilder()
   .setName("add")

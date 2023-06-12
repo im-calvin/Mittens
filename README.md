@@ -14,6 +14,9 @@ Push: `docker push imcalvin/mittens:VER_NUM`
 
 ## Database 
 
-The database uses SQLite with TypeORM. 
+The database uses SQLite with TypeORM. Notes on the tables:
+- The `languages` table refers to the organization (ex: Hololive) as well as the language (ex: English). 
+- The `groups` table is more specific and refers to a specific generation (ex: Hololive English Council)
 
-![Database Diagram](https://i.imgur.com/nBJdwEU.png)
+
+![Database Diagram](/static/dbdiagram.png)

@@ -41,7 +41,7 @@ export async function getStreamersByLanguage(language: Language): Promise<Stream
   });
 
   const streamers = await AppDataSource.getRepository(Streamer).find({
-    where: { language: language },
+    where: { language },
   });
 
   transaction.finish();
