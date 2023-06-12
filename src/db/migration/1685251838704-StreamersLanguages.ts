@@ -88,7 +88,7 @@ export class StreamersLanguages1685251838704 implements MigrationInterface {
     }
 
     for (const streamer of streamers) {
-      Object.entries(languageGroups).forEach(async ([language, groups]) => {
+      for (const [language, groups] of Object.entries(languageGroups)) {
         if (groups.map((group) => group.id).includes(streamer.group_id)) {
           // specify the correct group
           const [languageId] = await queryRunner.query(`SELECT id FROM languages WHERE name = ?`, [
@@ -99,7 +99,7 @@ export class StreamersLanguages1685251838704 implements MigrationInterface {
             streamer.id,
           ]);
         }
-      });
+      }
     }
   }
 
