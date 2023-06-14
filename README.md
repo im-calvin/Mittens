@@ -1,6 +1,20 @@
 # Mittens
 [![fork with dotenv-vault](https://badge.dotenv.org/fork.svg?r=1)](https://vault.dotenv.org/project/vlt_a88b4b86e3be377976336d5bc2d9f508d0792bbfd9cce02ce5af9879e452e3ca/example)
 
+[Add Mittens here!](https://discord.com/api/oauth2/authorize?client_id=631663182397702146&permissions=414464715840&scope=bot)
+
+If you have an issue or a feature request feel free to reach out to `calv.` on Discord
+
+## What does Mittens do?
+
+Mittens will monitor your chat for sentences and translates text from Japanese to English when required. In addition, Mittens keeps a schedule of (for now) Hololive streamers to notify you and your friends when someone on your following list goes live!
+Mittens uses slash commands with autocomplete. Below is a list of commands supported:
+- `add`: adds a streamer to your following list. You will get notifications in the channel you sent the command in
+- `remove`: removes a streamer from your following list
+- `list`: gets your current subscription list in your current discord channel
+- `schedule [streamer], [group], [org]`: gets the scheduled streams (stream reservations) for a particular streamer, group, or organization. See [database](#database) for more info.
+
+
 ## Building & Running
 
 You can either build it locally or use the Docker Hub Image 
