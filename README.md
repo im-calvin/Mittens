@@ -3,7 +3,9 @@
 
 [Add Mittens here!](https://discord.com/api/oauth2/authorize?client_id=631663182397702146&permissions=414464715840&scope=bot)
 
-If you have an issue or a feature request feel free to reach out to `calv.` on Discord
+If you have an issue or a feature request feel free to reach out to `calv.` on Discord.
+
+This is version 2 of Mittens boasting a 200% speed increase over version 1 which can be found [here](https://github.com/im-calvin/mittens_bot_v1) 
 
 ## What does Mittens do?
 
