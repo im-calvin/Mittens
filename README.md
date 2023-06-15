@@ -5,7 +5,7 @@
 
 If you have an issue or a feature request feel free to reach out to `calv.` on Discord.
 
-This is version 2 of Mittens boasting a 200% speed increase over version 1 which can be found [here](https://github.com/im-calvin/mittens_bot_v1) 
+This is version 2 of Mittens boasting a 200% speed increase over [version 1 of Mittens](https://github.com/im-calvin/mittens_bot_v1)
 
 ## What does Mittens do?
 
