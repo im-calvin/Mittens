@@ -37,7 +37,8 @@ export async function announceStream(
   const relTime = time(video.scheduledTime, "R");
 
   let mentions: string = "";
-  for (let user_id of user_ids) {
+  const mentionSet = new Set<string>(user_ids);
+  for (let user_id of mentionSet) {
     mentions = mentions.concat(userMention(user_id));
   }
 
