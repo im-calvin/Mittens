@@ -7,7 +7,6 @@ import {
   TableForeignKey,
 } from "typeorm";
 import { Group } from "../entity/Group.js";
-import { Streamer } from "../entity/Streamer.js";
 
 export class StreamersLanguages1685251838704 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
