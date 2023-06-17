@@ -121,9 +121,10 @@ export async function scrape() {
         const participants = [];
         if (video.mentions !== undefined) {
           for (const vid_streamer of video.mentions) {
-            const db_streamer = await streamerRepo.findOneByOrFail({
+            const db_streamer = await streamerRepo.findOneBy({
               id: vid_streamer.id,
             });
+            if (db_streamer === null) continue; // if hoster was hololive, but it was a collab with outside of hololive, then streamer won't be in repo and then continue
             const participant = new VideoParticipant(db_vid, db_streamer);
             participants.push(participant);
             // await participantRepo.save(participant);

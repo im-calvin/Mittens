@@ -4,12 +4,13 @@ import {
   AutocompleteInteraction,
 } from "discord.js";
 import add from "../commands/add.js";
-import { getDBStreamers, getGroups } from "../constants.js";
+import { getDBStreamers, getGroups, getLanguages } from "../constants.js";
 import remove from "../commands/remove.js";
 import list from "../commands/list.js";
 import schedule from "../commands/schedule.js";
-import { Group } from "src/db/entity/Group.js";
-import { Streamer } from "src/db/entity/Streamer.js";
+import { Group } from "../db/entity/Group.js";
+import { Streamer } from "../db/entity/Streamer.js";
+import { Language } from "../db/entity/Language.js";
 
 export interface CommandData {
   command: SlashCommandBuilder;
@@ -47,14 +48,14 @@ declare global {
     ): S[];
 
     // カスタム
-    filter<T, U>(
-      predicate: (value: T | U, index: number, array: T[]) => unknown,
+    filter<T, U, V>(
+      predicate: (value: T | U | V, index: number, array: T[] | U[] | V[]) => unknown,
       thisArg?: any
-    ): T[] | U[];
+    ): T[] | U[] | V[];
   }
 }
 
-export async function autoCompleteStreamersGroups(
+export async function autoCompleteStreamersGroupsLangs(
   interaction: AutocompleteInteraction
 ): Promise<void> {
   const focusedValue = interaction.options.getFocused(true);
@@ -66,12 +67,13 @@ export async function autoCompleteStreamersGroups(
     target = await getDBStreamers();
   } else if (focusedValue.name === "group") {
     target = await getGroups();
+  } else if (focusedValue.name === "language") {
+    target = await getLanguages();
   } else {
     return;
   }
 
-  // TODO :D
-  const filtered = target.filter<Streamer, Group>((t) =>
+  const filtered = target.filter<Streamer, Group, Language>((t) =>
     t.name.toLowerCase().includes(focusedValue.value.toLowerCase())
   );
 

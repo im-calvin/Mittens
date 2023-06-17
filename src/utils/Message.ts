@@ -2,6 +2,8 @@ import {
   TextChannel,
   userMention,
   time,
+  hyperlink,
+  inlineCode,
   EmbedBuilder,
   ChatInputCommandInteraction,
 } from "discord.js";
@@ -25,9 +27,9 @@ export async function announceStream(
     op: "announceStream",
     name: "Announces a stream to a channel",
   });
-  const channel = client.channels.cache.get(channel_id)
+  const channel = client.channels.cache.get(channel_id);
   if (!(channel instanceof TextChannel)) {
-    throw new Error()
+    throw new Error();
   }
 
   // formatted as documented here: https://old.discordjs.dev/#/docs/discord.js/14.10.2/typedef/TimestampStylesString
@@ -51,18 +53,22 @@ export async function announceStream(
 }
 
 export async function embedScheduleFormatter(
-  fields: DataField[],
+  videos: Video[],
   interaction: ChatInputCommandInteraction
 ) {
+  const embedFields = videos.map((video) => ({
+    name: `${time(video.scheduledTime, "f")} / ${time(video.scheduledTime, "R")}`,
+    value: `${inlineCode(video.hostStreamer.name)}: ${hyperlink(video.title, video.id)}`,
+  }));
+
   const embed = new EmbedBuilder()
     .setColor(0xfcc174)
     .setTitle("Schedule")
-    .addFields(fields.slice(0, 25))
+    .addFields(embedFields.slice(0, 25))
     .setTimestamp();
 
   await interaction.reply({ embeds: [embed] });
 }
-
 export interface DataField {
   name: string;
   value: string;
