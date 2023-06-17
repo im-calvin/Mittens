@@ -1,4 +1,4 @@
-import { config } from "dotenv-vault-core";
+import { config } from "dotenv";
 config();
 
 export const readEnv = (env: string): string => {
