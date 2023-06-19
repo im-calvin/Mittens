@@ -33,7 +33,7 @@
     "node-schedule": "^2.1.1",
     "reflect-metadata": "^0.1.13",
     "sqlite3": "^5.1.6",
-    "toad-scheduler": "^2.2.0",
+    "toad-scheduler": "^3.0.0",
     "typeorm": "^0.3.16"
   },
   "devDependencies": {
