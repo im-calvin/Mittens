@@ -1,6 +1,7 @@
 import Sentry from "@sentry/node";
 import { ProfilingIntegration } from "@sentry/profiling-node";
 import { AppDataSource } from "./db/data-source.js";
+import { readEnv } from "./utils/env.js";
 
 export async function init(): Promise<void> {
   // inits Sentry
@@ -13,6 +14,7 @@ export async function init(): Promise<void> {
     ],
     tracesSampleRate: 1.0,
     profilesSampleRate: 1.0,
+    release: "mittens@" + readEnv("npm_package_version"),
   });
   // start the db & run migrations
   await AppDataSource.initialize();

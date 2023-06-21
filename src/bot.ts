@@ -93,7 +93,8 @@ client.on(Events.MessageCreate, async (message: Message) => {
   if (
     message.author.id === client.user!.id ||
     message.author.bot ||
-    message.content.startsWith("::")
+    message.content.startsWith("::") ||
+    message.content === ""
   )
     return;
   const translatedText = await handleTranslate(message);
