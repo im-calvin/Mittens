@@ -2,7 +2,7 @@ import { v3 } from "@google-cloud/translate";
 import { readEnv } from "../utils/env.js";
 import { Message } from "discord.js";
 import Sentry from "@sentry/node";
-import { targetConfidence, targetLanguage } from "../constants.js";
+import { targetConfidence, targetLanguages } from "../constants.js";
 
 const translationClient = new v3.TranslationServiceClient({
   credentials: JSON.parse(readEnv("GOOGLE_APPLICATION_CREDENTIALS")),
@@ -46,6 +46,7 @@ async function translateText(text: string, language: string): Promise<string> {
  * @returns true if the text is detected as the target language
  */
 async function detectLanguage(text: string): Promise<DetectedLanguage> {
+  
   const transaction = Sentry.startTransaction({
     op: "detectLanguage",
     name: "Detects the language of the text",
@@ -71,7 +72,7 @@ async function detectLanguage(text: string): Promise<DetectedLanguage> {
   transaction.finish();
   return {
     confidence:
-      language.confidence > targetConfidence && targetLanguage.includes(language.languageCode),
+      language.confidence > targetConfidence && targetLanguages.includes(language.languageCode),
     language: language.languageCode,
   };
 }
