@@ -68,7 +68,7 @@ export async function embedScheduleFormatter(
     .addFields(embedFields.slice(0, 25))
     .setTimestamp();
 
-  await interaction.reply({ embeds: [embed] });
+  await interaction.editReply({ embeds: [embed] });
 }
 export interface DataField {
   name: string;

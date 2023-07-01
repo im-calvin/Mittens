@@ -51,6 +51,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
     return;
   }
 
+  // defer reply
+  await interaction.deferReply();
+
   try {
     await command.execute(interaction);
   } catch (error) {
