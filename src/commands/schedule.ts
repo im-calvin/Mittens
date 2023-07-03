@@ -90,7 +90,7 @@ const schedule: CommandData = {
         .leftJoin(Streamer, "hostStreamers", "videos.host_streamer_id = hostStreamers.id")
         .leftJoinAndSelect("videos.participantStreamers", "ps")
         .leftJoinAndSelect("videos.hostStreamer", "hs")
-        .where("videos.scheduledTime > :date", { date: new Date() })
+        .where("videos.scheduledTime > datetime('now')")
         .andWhere("hostStreamers.group_id = :groupId OR participantStreamers.group_id = :groupId", {
           groupId,
         })
@@ -109,15 +109,17 @@ const schedule: CommandData = {
           "participantStreamers.id IN (SELECT vp.participant_streamer_id FROM video_participants vp WHERE vp.video_id = videos.id)"
         )
         .leftJoin(Streamer, "hostStreamers", "videos.host_streamer_id = hostStreamers.id")
+        // same result as eagerly loading foreign key tables
         .leftJoinAndSelect("videos.participantStreamers", "ps")
         .leftJoinAndSelect("videos.hostStreamer", "hs")
-        .where("videos.scheduledTime > :date", { date: new Date() })
-        // .andWhere("videos.scheduledTime < :date", { date: getDateTenDaysAhead() }) // TODO no checking for dates in the future (will bring up a lot of freechats)
+        .where("videos.scheduledTime > datetime()")
+        // .andWhere("videos.scheduledTime < :tenDaysAhead", { tenDaysAhead: getDateTenDaysAhead() })
         .andWhere(
           "hostStreamers.language_id = :languageId OR participantStreamers.language_id = :languageId",
           { languageId }
         )
         .orderBy("videos.scheduledTime", "ASC")
+        .take(25)
         .getMany();
 
       await embedScheduleFormatter(videos, interaction);
