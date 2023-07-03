@@ -10,6 +10,13 @@ import { getDateTenDaysAhead } from "../constants.js";
 const command = new SlashCommandBuilder()
   .setName("schedule")
   .setDescription("Lists the upcoming streams for the given channel(s)");
+
+command.addStringOption((option) =>
+  option
+    .setName("language")
+    .setDescription("The specific org + language to find upcoming streams for")
+    .setAutocomplete(true)
+);
 command.addStringOption((option) =>
   option
     .setName("streamer")
@@ -20,12 +27,6 @@ command.addStringOption((option) =>
   option
     .setName("group")
     .setDescription("The group to find the upcoming streams for")
-    .setAutocomplete(true)
-);
-command.addStringOption((option) =>
-  option
-    .setName("language")
-    .setDescription("The specific org + language to find upcoming streams for")
     .setAutocomplete(true)
 );
 
