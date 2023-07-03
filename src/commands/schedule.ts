@@ -10,6 +10,13 @@ import { getDateTenDaysAhead } from "../constants.js";
 const command = new SlashCommandBuilder()
   .setName("schedule")
   .setDescription("Lists the upcoming streams for the given channel(s)");
+
+command.addStringOption((option) =>
+  option
+    .setName("language")
+    .setDescription("The specific org + language to find upcoming streams for")
+    .setAutocomplete(true)
+);
 command.addStringOption((option) =>
   option
     .setName("streamer")
@@ -22,16 +29,6 @@ command.addStringOption((option) =>
     .setDescription("The group to find the upcoming streams for")
     .setAutocomplete(true)
 );
-command.addStringOption((option) =>
-  option
-    .setName("language")
-    .setDescription("The specific org + language to find upcoming streams for")
-    .setAutocomplete(true)
-);
-
-type VideoData = Pick<Video, "id" | "title" | "scheduledTime"> & {
-  hostStreamerId: Video["hostStreamer"]["id"];
-};
 
 const schedule: CommandData = {
   command,
@@ -63,6 +60,7 @@ const schedule: CommandData = {
       const videos = await AppDataSource.getRepository(Video)
         .createQueryBuilder("videos")
         .where("videos.scheduledTime > :date", { date: new Date() })
+        .andWhere("videos.scheduledTime < :tenDaysAhead", { tenDaysAhead: getDateTenDaysAhead() })
         .andWhere(
           new Brackets((qb) => {
             qb.where("videos.hostStreamer.id = :streamerId", { streamerId }).orWhere(
@@ -74,6 +72,7 @@ const schedule: CommandData = {
         .leftJoinAndSelect("videos.participantStreamers", "ps")
         .leftJoinAndSelect("videos.hostStreamer", "hs")
         .orderBy("videos.scheduledTime", "ASC")
+        .take(25)
         .getMany();
 
       await embedScheduleFormatter(videos, interaction);
@@ -91,10 +90,17 @@ const schedule: CommandData = {
         .leftJoinAndSelect("videos.participantStreamers", "ps")
         .leftJoinAndSelect("videos.hostStreamer", "hs")
         .where("videos.scheduledTime > :date", { date: new Date() })
-        .andWhere("hostStreamers.group_id = :groupId OR participantStreamers.group_id = :groupId", {
-          groupId,
-        })
+        .andWhere("videos.scheduledTime < :tenDaysAhead", { tenDaysAhead: getDateTenDaysAhead() })
+        .andWhere(
+          new Brackets((qb) => {
+            qb.where("hostStreamers.group_id = :groupId", { groupId }).orWhere(
+              "participantStreamers.group_id = :groupId",
+              { groupId }
+            );
+          })
+        )
         .orderBy("videos.scheduledTime", "ASC")
+        .take(25)
         .getMany();
 
       await embedScheduleFormatter(videos, interaction);
@@ -109,15 +115,21 @@ const schedule: CommandData = {
           "participantStreamers.id IN (SELECT vp.participant_streamer_id FROM video_participants vp WHERE vp.video_id = videos.id)"
         )
         .leftJoin(Streamer, "hostStreamers", "videos.host_streamer_id = hostStreamers.id")
+        // same result as eagerly loading foreign key tables
         .leftJoinAndSelect("videos.participantStreamers", "ps")
         .leftJoinAndSelect("videos.hostStreamer", "hs")
         .where("videos.scheduledTime > :date", { date: new Date() })
-        // .andWhere("videos.scheduledTime < :date", { date: getDateTenDaysAhead() }) // TODO no checking for dates in the future (will bring up a lot of freechats)
+        .andWhere("videos.scheduledTime < :tenDaysAhead", { tenDaysAhead: getDateTenDaysAhead() })
         .andWhere(
-          "hostStreamers.language_id = :languageId OR participantStreamers.language_id = :languageId",
-          { languageId }
+          new Brackets((qb) => {
+            qb.where("hostStreamers.language_id = :languageId", { languageId }).orWhere(
+              "participantStreamers.language_id = :languageId",
+              { languageId }
+            );
+          })
         )
         .orderBy("videos.scheduledTime", "ASC")
+        .take(25)
         .getMany();
 
       await embedScheduleFormatter(videos, interaction);

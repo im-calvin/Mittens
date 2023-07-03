@@ -63,6 +63,5 @@ export async function getLanguages(): Promise<Language[]> {
 export function getDateTenDaysAhead(): Date {
   const tenDaysAhead = new Date();
   tenDaysAhead.setDate(tenDaysAhead.getDate() + 10);
-
   return tenDaysAhead;
 }

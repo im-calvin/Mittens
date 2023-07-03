@@ -12,6 +12,7 @@ import { VideoParticipant } from "./entity/VideoParticipant.js";
 import { UniqueIndexSubs1684569492134 } from "./migration/1684569492134-UniqueIndexSubs.js";
 import { ClearNonUniqueSubs1684426659702 } from "./migration/1684426659702-ClearNonUniqueSubs.js";
 import { StreamersLanguages1685251838704 } from "./migration/1685251838704-StreamersLanguages.js";
+import { AddLivePinged1688194621864 } from "./migration/1688194621864-AddLivePinged.js";
 
 export const AppDataSource = new DataSource({
   type: "sqlite",
@@ -33,6 +34,7 @@ export const AppDataSource = new DataSource({
     ClearNonUniqueSubs1684426659702,
     UniqueIndexSubs1684569492134,
     StreamersLanguages1685251838704,
+    AddLivePinged1688194621864,
   ],
   subscribers: [],
   migrationsTransactionMode: "all",

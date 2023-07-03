@@ -26,6 +26,10 @@ const participantRepo = AppDataSource.getRepository(VideoParticipant);
 export function scheduleAnnounce(date: Date, video: Video, isLive: boolean) {
   // message users about a video
   const job = schedule.scheduleJob(date, async function () {
+    // trip live_pinged flag to be true (issue #39)
+    video.livePinged = true;
+    videoRepo.save(video);
+
     // get all users that follow the members that partipate in the video
     const newVideo = await videoRepo.findOneOrFail({
       where: {
@@ -83,7 +87,6 @@ export async function scrape() {
       }
       // videoMembers is the Video.members field in the db
       let videoMembers: HolodexChannel[] = [];
-      // let participants: VideoParticipant[] = [];
 
       // add the mentioned members (if it exists) to the videoMembers arr
       if (video.mentions !== undefined) {
@@ -102,6 +105,7 @@ export async function scrape() {
 
       const url = `https://youtube.com/watch?v=${video.id}`;
       const db_vid = new Video(url, new Date(video.available_at), video.title, streamer);
+      db_vid.livePinged = false;
 
       // check to see if video is in db
       const maybeVideo = await videoRepo.findOne({
@@ -127,7 +131,6 @@ export async function scrape() {
             if (db_streamer === null) continue; // if hoster was hololive, but it was a collab with outside of hololive, then streamer won't be in repo and then continue
             const participant = new VideoParticipant(db_vid, db_streamer);
             participants.push(participant);
-            // await participantRepo.save(participant);
           }
         }
         db_vid.participantStreamers = participants;
@@ -154,7 +157,7 @@ export async function scrape() {
     }
   });
 
-  const job = new SimpleIntervalJob({ minutes: intervalTime, runImmediately: true }, task);
+  const job = new SimpleIntervalJob({ minutes: intervalTime, runImmediately: false }, task);
 
   scheduler.addSimpleIntervalJob(job);
   transaction.finish();
