@@ -8,9 +8,7 @@ import { Streamer } from "../db/entity/Streamer.js";
 
 const command = new SlashCommandBuilder()
   .setName("remove")
-  .setDescription(
-    "Removes a user to your subscription list in your current discord channel."
-  );
+  .setDescription("Removes a user to your subscription list in your current discord channel.");
 // need to split this up for some reason
 command.addStringOption((option) =>
   option
@@ -32,7 +30,7 @@ const remove: CommandData = {
       },
     });
     if (streamer === null) {
-      await interaction.reply("Streamer not found!");
+      await interaction.editReply("Streamer not found!");
       return;
     }
     // TODO for egora: is there a better way of optimizing saves and fetches from the database than doing them manually like this (cascade option in save?)
@@ -43,14 +41,14 @@ const remove: CommandData = {
     );
 
     // check if the subscription exists and remove it if it does
-    const subscribed = await AppDataSource.getRepository(
-      DiscordUserSubscription
-    ).findOneBy(discordUserSub);
+    const subscribed = await AppDataSource.getRepository(DiscordUserSubscription).findOneBy(
+      discordUserSub
+    );
     if (subscribed) {
       await AppDataSource.getRepository(DiscordUserSubscription).remove(subscribed);
-      await interaction.reply(`Successfully removed ${streamer.name}!`);
+      await interaction.editReply(`Successfully removed ${streamer.name}!`);
     } else {
-      await interaction.reply(`You're not following ${streamer.name}!`);
+      await interaction.editReply(`You're not following ${streamer.name}!`);
       return;
     }
   },

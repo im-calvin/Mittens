@@ -31,7 +31,7 @@ const add: CommandData = {
       },
     });
     if (streamer === null) {
-      await interaction.reply("Streamer not found!");
+      await interaction.editReply("Streamer not found!");
       return;
     }
     // TODO for egora: is there a better way of optimizing saves and fetches from the database than doing them manually like this (cascade option in save?)
@@ -46,11 +46,11 @@ const add: CommandData = {
       discordUserSub
     );
     if (subscribed) {
-      await interaction.reply(`You are already subscribed to ${streamer.name}!`);
+      await interaction.editReply(`You are already subscribed to ${streamer.name}!`);
       return;
     } else {
       await AppDataSource.getRepository(DiscordUserSubscription).insert(discordUserSub);
-      await interaction.reply(`Successfully added ${streamer.name}!`);
+      await interaction.editReply(`Successfully added ${streamer.name}!`);
     }
   },
 };

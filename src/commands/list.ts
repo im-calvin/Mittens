@@ -8,9 +8,7 @@ import { Streamer } from "../db/entity/Streamer.js";
 
 const command = new SlashCommandBuilder()
   .setName("list")
-  .setDescription(
-    "Lists your current subscription list in your current discord channel."
-  );
+  .setDescription("Lists your current subscription list in your current discord channel.");
 
 const list: CommandData = {
   command,
@@ -22,13 +20,11 @@ const list: CommandData = {
       },
     });
     if (!discordUser) {
-      await interaction.reply("You have no subscriptions!");
+      await interaction.editReply("You have no subscriptions!");
       return;
     }
 
-    const discordUserSubs = await AppDataSource.getRepository(
-      DiscordUserSubscription
-    ).find({
+    const discordUserSubs = await AppDataSource.getRepository(DiscordUserSubscription).find({
       where: {
         discordUser: discordUser,
         discordChannelId: interaction.channelId,
@@ -37,12 +33,12 @@ const list: CommandData = {
     });
 
     if (discordUserSubs.length === 0) {
-      await interaction.reply("You have no subscriptions!");
+      await interaction.editReply("You have no subscriptions!");
       return;
     }
 
     const streamerNames = discordUserSubs.map((sub) => sub.streamer.name);
-    await interaction.reply(`**Your subscriptions:** \n${streamerNames.join("\n")}`);
+    await interaction.editReply(`**Your subscriptions:** \n${streamerNames.join("\n")}`);
   },
 };
 
