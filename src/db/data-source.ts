@@ -18,7 +18,7 @@ export const AppDataSource = new DataSource({
   type: "sqlite",
   database: "data/database.sqlite",
   synchronize: false,
-  logging: ["query", "error"],
+  logging: ["error"],
   entities: [
     Video,
     DiscordUser,
