@@ -29,10 +29,6 @@ command.addStringOption((option) =>
     .setAutocomplete(true)
 );
 
-type VideoData = Pick<Video, "id" | "title" | "scheduledTime"> & {
-  hostStreamerId: Video["hostStreamer"]["id"];
-};
-
 const schedule: CommandData = {
   command,
   autoComplete: autoCompleteStreamersGroupsLangs,
@@ -74,6 +70,7 @@ const schedule: CommandData = {
         .leftJoinAndSelect("videos.participantStreamers", "ps")
         .leftJoinAndSelect("videos.hostStreamer", "hs")
         .orderBy("videos.scheduledTime", "ASC")
+        .take(25)
         .getMany();
 
       await embedScheduleFormatter(videos, interaction);
@@ -90,11 +87,18 @@ const schedule: CommandData = {
         .leftJoin(Streamer, "hostStreamers", "videos.host_streamer_id = hostStreamers.id")
         .leftJoinAndSelect("videos.participantStreamers", "ps")
         .leftJoinAndSelect("videos.hostStreamer", "hs")
-        .where("videos.scheduledTime > datetime('now')")
-        .andWhere("hostStreamers.group_id = :groupId OR participantStreamers.group_id = :groupId", {
-          groupId,
-        })
+        .where("videos.scheduledTime > :date", { date: new Date() })
+        .andWhere("videos.scheduledTime < :tenDaysAhead", { tenDaysAhead: getDateTenDaysAhead() })
+        .andWhere(
+          new Brackets((qb) => {
+            qb.where("hostStreamers.group_id = :groupId", { groupId }).orWhere(
+              "participantStreamers.group_id = :groupId",
+              { groupId }
+            );
+          })
+        )
         .orderBy("videos.scheduledTime", "ASC")
+        .take(25)
         .getMany();
 
       await embedScheduleFormatter(videos, interaction);
@@ -112,11 +116,15 @@ const schedule: CommandData = {
         // same result as eagerly loading foreign key tables
         .leftJoinAndSelect("videos.participantStreamers", "ps")
         .leftJoinAndSelect("videos.hostStreamer", "hs")
-        .where("videos.scheduledTime > datetime()")
-        // .andWhere("videos.scheduledTime < :tenDaysAhead", { tenDaysAhead: getDateTenDaysAhead() })
+        .where("videos.scheduledTime > :date", { date: new Date() })
+        .andWhere("videos.scheduledTime < :tenDaysAhead", { tenDaysAhead: getDateTenDaysAhead() })
         .andWhere(
-          "hostStreamers.language_id = :languageId OR participantStreamers.language_id = :languageId",
-          { languageId }
+          new Brackets((qb) => {
+            qb.where("hostStreamers.language_id = :languageId", { languageId }).orWhere(
+              "participantStreamers.language_id = :languageId",
+              { languageId }
+            );
+          })
         )
         .orderBy("videos.scheduledTime", "ASC")
         .take(25)
