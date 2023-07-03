@@ -32,6 +32,6 @@ export class Video {
   })
   participantStreamers: Relation<VideoParticipant[]>;
 
-  @Column({ type: "boolean", name: "live_pinged" })
+  @Column({ type: "boolean", name: "live_pinged", default: false })
   livePinged: boolean;
 }
