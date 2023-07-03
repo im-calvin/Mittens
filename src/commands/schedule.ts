@@ -59,6 +59,7 @@ const schedule: CommandData = {
       const videos = await AppDataSource.getRepository(Video)
         .createQueryBuilder("videos")
         .where("videos.scheduledTime > :date", { date: new Date() })
+        .andWhere("videos.scheduledTime < :tenDaysAhead", { tenDaysAhead: getDateTenDaysAhead() })
         .andWhere(
           new Brackets((qb) => {
             qb.where("videos.hostStreamer.id = :streamerId", { streamerId }).orWhere(
