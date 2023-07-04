@@ -41,17 +41,14 @@ const schedule: CommandData = {
 
     if (!(streamerId || groupId || languageId)) {
       // show schedule for all upcoming
-      const videos = await AppDataSource.getRepository(Video).find({
-        where: [
-          {
-            scheduledTime: MoreThan(new Date()),
-          },
-        ],
-        order: {
-          scheduledTime: "ASC",
-        },
-        relations: ["hostStreamer"],
-      });
+      const videos = await AppDataSource.getRepository(Video)
+        .createQueryBuilder("videos")
+        .leftJoinAndSelect("videos.hostStreamer", "hs")
+        .where("videos.scheduledTime > :date", { date: new Date() })
+        .andWhere("videos.scheduledTime < :tenDaysAhead", { tenDaysAhead: getDateTenDaysAhead() })
+        .orderBy("videos.scheduledTime", "ASC")
+        .take(25)
+        .getMany();
 
       await embedScheduleFormatter(videos, interaction);
       return;
