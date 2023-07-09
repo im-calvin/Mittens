@@ -1,18 +1,12 @@
-import {
-  GatewayIntentBits,
-  Events,
-  BaseInteraction,
-  Message,
-  Awaitable,
-  PartialMessage,
-  MessageManager,
-} from "discord.js";
+import { GatewayIntentBits, Events, Message, PartialMessage } from "discord.js";
 import MittensClient from "./utils/Client.js";
 import { handleTranslate } from "./translate/Translate.js";
 import Sentry from "@sentry/node";
 import { readEnv } from "./utils/env.js";
 import { init } from "./init.js";
 import { scrape } from "./utils/schedule.js";
+import { AppDataSource } from "./db/data-source.js";
+import { GuildTranslate } from "./db/entity/GuildTranslate.js";
 
 await init();
 
@@ -20,6 +14,8 @@ const boot = Sentry.startTransaction({
   op: "boot",
   name: "First time launch of Mittens",
 });
+
+const guildTranslateRepo = AppDataSource.getRepository(GuildTranslate);
 
 export const client = new MittensClient({
   intents: [
@@ -89,6 +85,19 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
 // handle translating
 client.on(Events.MessageCreate, async (message: Message) => {
+  // if dm
+  if (!message.guildId) {
+    return;
+  }
+  // if the admins turned off translating in their server
+  // the database should always have a guild in it because the db gets updated every time mittens joins a guild
+  const guildTranslate = await guildTranslateRepo.findOneByOrFail({
+    discordGuildId: message.guildId,
+  });
+  if (!guildTranslate.status) {
+    return;
+  }
+
   const transaction = Sentry.startTransaction({
     op: "msgCreate",
     name: "Message creation interaction",
@@ -142,6 +151,21 @@ client.on(
     transaction.finish();
   }
 );
+
+// handle joining a guild (for toggling translate)
+// set default for translation to be false
+client.on(Events.GuildCreate, (guild) => {
+  const transaction = Sentry.startTransaction({
+    op: "guildCreate",
+    name: "Mittens added to a new guild",
+  });
+  const guildTranslate = new GuildTranslate();
+  guildTranslate.status = false;
+  guildTranslate.discordGuildId = guild.id;
+
+  guildTranslateRepo.insert(guildTranslate);
+  transaction.finish();
+});
 
 client.login(readEnv("DISCORD_TOKEN"));
 boot.finish();

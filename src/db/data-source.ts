@@ -13,6 +13,8 @@ import { UniqueIndexSubs1684569492134 } from "./migration/1684569492134-UniqueIn
 import { ClearNonUniqueSubs1684426659702 } from "./migration/1684426659702-ClearNonUniqueSubs.js";
 import { StreamersLanguages1685251838704 } from "./migration/1685251838704-StreamersLanguages.js";
 import { AddLivePinged1688194621864 } from "./migration/1688194621864-AddLivePinged.js";
+import { AddTranslateStatuses1688860131193 } from "./migration/1688860131193-AddTranslateStatuses.js";
+import { GuildTranslate } from "./entity/GuildTranslate.js";
 
 export const AppDataSource = new DataSource({
   type: "sqlite",
@@ -27,6 +29,7 @@ export const AppDataSource = new DataSource({
     DiscordUserSubscription,
     VideoParticipant,
     Language,
+    GuildTranslate,
   ],
   migrations: [
     InitMigration,
@@ -35,6 +38,7 @@ export const AppDataSource = new DataSource({
     UniqueIndexSubs1684569492134,
     StreamersLanguages1685251838704,
     AddLivePinged1688194621864,
+    AddTranslateStatuses1688860131193,
   ],
   subscribers: [],
   migrationsTransactionMode: "all",
