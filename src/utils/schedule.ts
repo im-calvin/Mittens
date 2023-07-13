@@ -16,7 +16,6 @@ const scheduler = new ToadScheduler();
 const videoRepo = AppDataSource.getRepository(Video);
 const subRepo = AppDataSource.getRepository(DiscordUserSubscription);
 const streamerRepo = AppDataSource.getRepository(Streamer);
-const participantRepo = AppDataSource.getRepository(VideoParticipant);
 
 /**
  * schedules a job to message users on discord about a particular video

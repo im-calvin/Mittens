@@ -11,6 +11,8 @@ import schedule from "../commands/schedule.js";
 import { Group } from "../db/entity/Group.js";
 import { Streamer } from "../db/entity/Streamer.js";
 import { Language } from "../db/entity/Language.js";
+import toggleTranslate from "../commands/toggleTranslate.js";
+import translateStatus from "../commands/translateStatus.js";
 
 export interface CommandData {
   command: SlashCommandBuilder;
@@ -18,7 +20,14 @@ export interface CommandData {
   execute: (interaction: ChatInputCommandInteraction) => void | Promise<void>;
 }
 
-export const commands: CommandData[] = [add, remove, list, schedule];
+export const commands: CommandData[] = [
+  add,
+  remove,
+  list,
+  schedule,
+  toggleTranslate,
+  translateStatus,
+];
 
 export async function autoCompleteStreamers(interaction: AutocompleteInteraction): Promise<void> {
   const focusedValue = interaction.options.getString("streamer", true).toLowerCase();

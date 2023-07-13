@@ -1,10 +1,8 @@
 import { SlashCommandBuilder } from "discord.js";
 import { CommandData } from "../utils/cmdLoader.js";
-import { autoCompleteStreamers } from "../utils/cmdLoader.js";
 import { DiscordUser } from "../db/entity/DiscordUser.js";
 import { DiscordUserSubscription } from "../db/entity/DiscordUserSubscription.js";
 import { AppDataSource } from "../db/data-source.js";
-import { Streamer } from "../db/entity/Streamer.js";
 
 const command = new SlashCommandBuilder()
   .setName("list")
