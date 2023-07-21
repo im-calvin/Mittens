@@ -29,5 +29,5 @@ declare class Kuroshiro {
 }
 
 declare module "kuroshiro" {
-  export = Kuroshiro;
+  export default Kuroshiro;
 }

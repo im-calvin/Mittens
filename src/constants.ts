@@ -9,6 +9,8 @@ export const targetLanguages = ["ja"]; // possible languages to translate from (
 
 export const intervalTime = 5; // the interval for scraping
 
+export const CMD_PREFIX = "$";
+
 export async function getDBStreamers(): Promise<Streamer[]> {
   const transaction = Sentry.startTransaction({
     op: "getDBStreamers",

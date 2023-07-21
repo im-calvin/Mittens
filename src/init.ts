@@ -8,7 +8,7 @@ import { Video } from "./db/entity/Video.js";
 import { MoreThan } from "typeorm";
 import { scheduleAnnounce } from "./utils/schedule.js";
 
-export const kuroshiro: Kuroshiro = new Kuroshiro();
+export const kuroshiro = new Kuroshiro();
 
 export async function init(): Promise<void> {
   // inits Sentry
