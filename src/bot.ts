@@ -107,8 +107,9 @@ client.on(Events.MessageCreate, async (message: Message) => {
     const cmd = message.content.substring(1);
     switch (cmd) {
       case "kana":
-        const reference = await message.fetchReference();
-        if (reference) {
+        const hasReference = message.reference;
+        if (hasReference) {
+          const reference = await message.fetchReference();
           const convertedMessage = await kuroshiro.convert(reference.content, {
             to: "hiragana",
             mode: "spaced",
