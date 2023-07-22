@@ -11,8 +11,9 @@ import MittensClient from "./utils/Client.js";
 import { handleTranslate } from "./translate/Translate.js";
 import Sentry from "@sentry/node";
 import { readEnv } from "./utils/env.js";
-import { init } from "./init.js";
+import { init, kuroshiro } from "./init.js";
 import { scrape } from "./utils/schedule.js";
+import { CMD_PREFIX } from "./constants.js";
 
 await init();
 
@@ -100,6 +101,32 @@ client.on(Events.MessageCreate, async (message: Message) => {
     message.content === ""
   )
     return;
+
+  // check for CMD_PREFIX (used for $kana)
+  if (message.content.startsWith(CMD_PREFIX)) {
+    const cmd = message.content.substring(1);
+    switch (cmd) {
+      case "kana":
+        const hasReference = message.reference;
+        if (hasReference) {
+          const reference = await message.fetchReference();
+          const convertedMessage = await kuroshiro.convert(reference.content, {
+            to: "hiragana",
+            mode: "spaced",
+          });
+          // double the size of the spaces because it's hard to see on discord
+          const doubleSpaceMsg = convertedMessage.replaceAll(" ", "  ");
+          await message.channel.send(doubleSpaceMsg);
+        } else {
+          await message.channel.send("You need to reply to a message!");
+        }
+        return;
+      default:
+        await message.channel.send(`No command called ${cmd} found!`);
+        return; // don't translate if the message starts with '$'
+    }
+  }
+
   const translatedText = await handleTranslate(message);
 
   if (translatedText) {

@@ -1,10 +1,14 @@
 import Sentry from "@sentry/node";
 import { ProfilingIntegration } from "@sentry/profiling-node";
+import Kuroshiro from "kuroshiro";
+import KuromojiAnalyzer from "kuroshiro-analyzer-kuromoji";
 import { AppDataSource } from "./db/data-source.js";
 import { readEnv } from "./utils/env.js";
 import { Video } from "./db/entity/Video.js";
 import { MoreThan } from "typeorm";
 import { scheduleAnnounce } from "./utils/schedule.js";
+
+export const kuroshiro = new Kuroshiro();
 
 export async function init(): Promise<void> {
   // inits Sentry
@@ -31,4 +35,5 @@ export async function init(): Promise<void> {
   for (const video of videos) {
     scheduleAnnounce(video.scheduledTime, video, true);
   }
+  await kuroshiro.init(new KuromojiAnalyzer());
 }
