@@ -31,7 +31,7 @@
     "@sentry/profiling-node": "^0.3.0",
     "discord.js": "^14.9.0",
     "dotenv": "^16.1.4",
-    "kuroshiro": "~1.1.2",
+    "kuroshiro": "~1.2.0",
     "kuroshiro-analyzer-kuromoji": "^1.1.0",
     "node-schedule": "^2.1.1",
     "reflect-metadata": "^0.1.13",
