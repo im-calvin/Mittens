@@ -1,12 +1,4 @@
-import {
-  GatewayIntentBits,
-  Events,
-  BaseInteraction,
-  Message,
-  Awaitable,
-  PartialMessage,
-  MessageManager,
-} from "discord.js";
+import { GatewayIntentBits, Events, Message, PartialMessage } from "discord.js";
 import MittensClient from "./utils/Client.js";
 import { handleTranslate } from "./translate/Translate.js";
 import Sentry from "@sentry/node";
@@ -112,11 +104,11 @@ client.on(Events.MessageCreate, async (message: Message) => {
           const reference = await message.fetchReference();
           const convertedMessage = await kuroshiro.convert(reference.content, {
             to: "hiragana",
-            mode: "spaced",
+            mode: "okurigana",
+            delimiter_start: "「",
+            delimiter_end: "」",
           });
-          // double the size of the spaces because it's hard to see on discord
-          const doubleSpaceMsg = convertedMessage.replaceAll(" ", "  ");
-          await message.channel.send(doubleSpaceMsg);
+          await message.channel.send(convertedMessage);
         } else {
           await message.channel.send("You need to reply to a message!");
         }
