@@ -62,7 +62,7 @@ export async function autoCompleteStreamersGroupsLangs(
 
   if (focusedValue.value === "") return;
 
-  let target: Streamer[] | Group[] | Language[];
+  let target: Streamer[] | Group[];
   if (focusedValue.name === "language") {
     target = await getLanguages();
   } else if (focusedValue.name === "streamer") {

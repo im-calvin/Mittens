@@ -1,6 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, Relation, JoinColumn } from "typeorm";
 import { Streamer } from "./Streamer.js";
-import { Group } from "./Group.js";
 
 enum HololiveLanguage {
   HOLOSTARS_ENGLISH = "Holostars English",
@@ -23,6 +22,6 @@ export class Language {
   @Column("text")
   name: HololiveLanguage;
 
-  @OneToMany(() => Group, (group) => group.language)
-  groups: Relation<Group[]>;
+  @OneToMany(() => Streamer, (streamer) => streamer.language)
+  streamers: Relation<Streamer[]>;
 }
