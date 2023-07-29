@@ -42,9 +42,11 @@ export async function getStreamersByLanguage(language: Language): Promise<Stream
     name: "Get all of the streamers related to a language in the database",
   });
 
-  const streamers = await AppDataSource.getRepository(Streamer).find({
-    where: { language },
-  });
+  const streamers = await AppDataSource.getRepository(Streamer)
+    .createQueryBuilder("streamers")
+    .leftJoinAndSelect(Group, "groups", "streamers.group_id = groups.id")
+    .leftJoin(Language, "languages", "groups.language_id = :language", { language: language.id })
+    .getMany();
 
   transaction.finish();
   return streamers;
