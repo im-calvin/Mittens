@@ -1,6 +1,6 @@
 {
   "name": "mittens",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "",
   "main": "src/bot.ts",
   "scripts": {
@@ -27,8 +27,9 @@
   "homepage": "https://github.com/im-calvin/Mittens#readme",
   "dependencies": {
     "@google-cloud/translate": "^7.2.1",
-    "@sentry/node": "^7.50.0",
-    "@sentry/profiling-node": "^0.3.0",
+    "@sentry/integrations": "^7.61.0",
+    "@sentry/node": "^7.61.0",
+    "@sentry/profiling-node": "^1.1.2",
     "discord.js": "^14.9.0",
     "dotenv": "^16.1.4",
     "kuroshiro": "~1.1.2",
