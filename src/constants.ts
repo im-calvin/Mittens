@@ -69,3 +69,9 @@ export function getDateTenDaysAhead(): Date {
   tenDaysAhead.setDate(tenDaysAhead.getDate() + 10);
   return tenDaysAhead;
 }
+
+export function getDate7DaysBehind(): Date {
+  const sevenDaysBehind = new Date();
+  sevenDaysBehind.setDate(sevenDaysBehind.getDate() - 10);
+  return sevenDaysBehind;
+}
