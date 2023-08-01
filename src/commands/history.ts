@@ -132,7 +132,7 @@ const history: CommandData = {
           sevenDaysBehind: getDate7DaysBehind(),
         })
         .andWhere("groups.language_id = :languageId", { languageId })
-        .orderBy("videos.scheduledTime", "ASC")
+        .orderBy("videos.scheduledTime", "DESC")
         .take(25)
         .getMany();
 
