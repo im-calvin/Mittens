@@ -5,33 +5,33 @@ import { Streamer } from "../db/entity/Streamer.js";
 import { Video } from "../db/entity/Video.js";
 import { embedScheduleFormatter } from "../utils/Message.js";
 import { Brackets, LessThan, MoreThan } from "typeorm";
-import { getDateTenDaysAhead } from "../constants.js";
+import { getDate7DaysBehind, getDateTenDaysAhead } from "../constants.js";
 import { Group } from "../db/entity/Group.js";
 
 const command = new SlashCommandBuilder()
-  .setName("schedule")
-  .setDescription("Lists the upcoming streams for the given channel(s)");
+  .setName("history")
+  .setDescription("Lists the stream history for the given channel(s)");
 
 command.addStringOption((option) =>
   option
     .setName("language")
-    .setDescription("The specific org + language to find upcoming streams for")
+    .setDescription("The specific org + language to find stream history for")
     .setAutocomplete(true)
 );
 command.addStringOption((option) =>
   option
     .setName("streamer")
-    .setDescription("The streamer to find the upcoming streams for")
+    .setDescription("The streamer to find the stream history for")
     .setAutocomplete(true)
 );
 command.addStringOption((option) =>
   option
     .setName("group")
-    .setDescription("The group to find the upcoming streams for")
+    .setDescription("The group to find the stream history for")
     .setAutocomplete(true)
 );
 
-const schedule: CommandData = {
+const history: CommandData = {
   command,
   autoComplete: autoCompleteStreamersGroupsLangs,
   execute: async (interaction) => {
@@ -45,9 +45,11 @@ const schedule: CommandData = {
       const videos = await AppDataSource.getRepository(Video)
         .createQueryBuilder("videos")
         .leftJoinAndSelect("videos.hostStreamer", "hs")
-        .where("videos.scheduledTime > :date", { date: new Date() })
-        .andWhere("videos.scheduledTime < :tenDaysAhead", { tenDaysAhead: getDateTenDaysAhead() })
-        .orderBy("videos.scheduledTime", "ASC")
+        .where("videos.scheduledTime < :date", { date: new Date() })
+        .andWhere("videos.scheduledTime > :sevenDaysBehind", {
+          sevenDaysBehind: getDate7DaysBehind(),
+        })
+        .orderBy("videos.scheduledTime", "DESC")
         .take(25)
         .getMany();
 
@@ -57,8 +59,10 @@ const schedule: CommandData = {
       // show schedule for specific streamer
       const videos = await AppDataSource.getRepository(Video)
         .createQueryBuilder("videos")
-        .where("videos.scheduledTime > :date", { date: new Date() })
-        .andWhere("videos.scheduledTime < :tenDaysAhead", { tenDaysAhead: getDateTenDaysAhead() })
+        .where("videos.scheduledTime < :date", { date: new Date() })
+        .andWhere("videos.scheduledTime > :sevenDaysBehind", {
+          sevenDaysBehind: getDate7DaysBehind(),
+        })
         .andWhere(
           new Brackets((qb) => {
             qb.where("videos.hostStreamer.id = :streamerId", { streamerId }).orWhere(
@@ -69,7 +73,7 @@ const schedule: CommandData = {
         )
         .leftJoinAndSelect("videos.participantStreamers", "ps")
         .leftJoinAndSelect("videos.hostStreamer", "hs")
-        .orderBy("videos.scheduledTime", "ASC")
+        .orderBy("videos.scheduledTime", "DESC")
         .take(25)
         .getMany();
 
@@ -87,8 +91,10 @@ const schedule: CommandData = {
         .leftJoin(Streamer, "hostStreamers", "videos.host_streamer_id = hostStreamers.id")
         .leftJoinAndSelect("videos.participantStreamers", "ps")
         .leftJoinAndSelect("videos.hostStreamer", "hs")
-        .where("videos.scheduledTime > :date", { date: new Date() })
-        .andWhere("videos.scheduledTime < :tenDaysAhead", { tenDaysAhead: getDateTenDaysAhead() })
+        .where("videos.scheduledTime < :date", { date: new Date() })
+        .andWhere("videos.scheduledTime > :sevenDaysBehind", {
+          sevenDaysBehind: getDate7DaysBehind(),
+        })
         .andWhere(
           new Brackets((qb) => {
             qb.where("hostStreamers.group_id = :groupId", { groupId }).orWhere(
@@ -97,7 +103,7 @@ const schedule: CommandData = {
             );
           })
         )
-        .orderBy("videos.scheduledTime", "ASC")
+        .orderBy("videos.scheduledTime", "DESC")
         .take(25)
         .getMany();
 
@@ -121,10 +127,12 @@ const schedule: CommandData = {
         // same result as eagerly loading foreign key tables
         .leftJoinAndSelect("videos.participantStreamers", "ps")
         .leftJoinAndSelect("videos.hostStreamer", "hs")
-        .where("videos.scheduledTime > :date", { date: new Date() })
-        .andWhere("videos.scheduledTime < :tenDaysAhead", { tenDaysAhead: getDateTenDaysAhead() })
+        .where("videos.scheduledTime < :date", { date: new Date() })
+        .andWhere("videos.scheduledTime > :sevenDaysBehind", {
+          sevenDaysBehind: getDate7DaysBehind(),
+        })
         .andWhere("groups.language_id = :languageId", { languageId })
-        .orderBy("videos.scheduledTime", "ASC")
+        .orderBy("videos.scheduledTime", "DESC")
         .take(25)
         .getMany();
 
@@ -136,4 +144,4 @@ const schedule: CommandData = {
   },
 };
 
-export default schedule;
+export default history;

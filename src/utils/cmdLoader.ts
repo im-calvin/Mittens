@@ -13,6 +13,7 @@ import { Streamer } from "../db/entity/Streamer.js";
 import { Language } from "../db/entity/Language.js";
 import toggleTranslate from "../commands/toggleTranslate.js";
 import translateStatus from "../commands/translateStatus.js";
+import history from "../commands/history.js";
 
 export interface CommandData {
   command: SlashCommandBuilder;
@@ -27,6 +28,7 @@ export const commands: CommandData[] = [
   schedule,
   toggleTranslate,
   translateStatus,
+  history
 ];
 
 export async function autoCompleteStreamers(interaction: AutocompleteInteraction): Promise<void> {
@@ -71,7 +73,7 @@ export async function autoCompleteStreamersGroupsLangs(
 
   if (focusedValue.value === "") return;
 
-  let target: Streamer[] | Group[];
+  let target: Streamer[] | Group[] | Language[];
   if (focusedValue.name === "language") {
     target = await getLanguages();
   } else if (focusedValue.name === "streamer") {

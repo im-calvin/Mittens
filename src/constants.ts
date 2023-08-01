@@ -9,6 +9,8 @@ export const targetLanguages = ["ja"]; // possible languages to translate from (
 
 export const intervalTime = 5; // the interval for scraping
 
+export const CMD_PREFIX = "$";
+
 export async function getDBStreamers(): Promise<Streamer[]> {
   const transaction = Sentry.startTransaction({
     op: "getDBStreamers",
@@ -40,9 +42,11 @@ export async function getStreamersByLanguage(language: Language): Promise<Stream
     name: "Get all of the streamers related to a language in the database",
   });
 
-  const streamers = await AppDataSource.getRepository(Streamer).find({
-    where: { language },
-  });
+  const streamers = await AppDataSource.getRepository(Streamer)
+    .createQueryBuilder("streamers")
+    .leftJoinAndSelect(Group, "groups", "streamers.group_id = groups.id")
+    .leftJoin(Language, "languages", "groups.language_id = :language", { language: language.id })
+    .getMany();
 
   transaction.finish();
   return streamers;
@@ -64,4 +68,10 @@ export function getDateTenDaysAhead(): Date {
   const tenDaysAhead = new Date();
   tenDaysAhead.setDate(tenDaysAhead.getDate() + 10);
   return tenDaysAhead;
+}
+
+export function getDate7DaysBehind(): Date {
+  const sevenDaysBehind = new Date();
+  sevenDaysBehind.setDate(sevenDaysBehind.getDate() - 10);
+  return sevenDaysBehind;
 }
