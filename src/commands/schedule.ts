@@ -78,7 +78,6 @@ const schedule: CommandData = {
         .where("videos.scheduledTime > :date", { date: new Date() })
         .andWhere("videos.scheduledTime < :tenDaysAhead", { tenDaysAhead: getDateTenDaysAhead() })
         .orderBy("videos.scheduledTime", "ASC")
-        .take(25)
         .getMany();
 
       await embedScheduleFormatter(videos, interaction);
@@ -100,7 +99,6 @@ const schedule: CommandData = {
         .leftJoinAndSelect("videos.participantStreamers", "ps")
         .leftJoinAndSelect("videos.hostStreamer", "hs")
         .orderBy("videos.scheduledTime", "ASC")
-        .take(25)
         .getMany();
 
       await embedScheduleFormatter(videos, interaction);
@@ -128,7 +126,6 @@ const schedule: CommandData = {
           })
         )
         .orderBy("videos.scheduledTime", "ASC")
-        .take(25)
         .getMany();
 
       await embedScheduleFormatter(videos, interaction);
@@ -155,13 +152,13 @@ const schedule: CommandData = {
         .andWhere("videos.scheduledTime < :tenDaysAhead", { tenDaysAhead: getDateTenDaysAhead() })
         .andWhere("groups.language_id = :languageId", { languageId })
         .orderBy("videos.scheduledTime", "ASC")
-        .take(25)
         .getMany();
 
       await embedScheduleFormatter(videos, interaction);
       return;
     } else if (subCommandName === "following") {
       const discordUserId = interaction.user.id;
+      const discordChannelId = interaction.channelId;
       const videos = await AppDataSource.getRepository(Video)
         .createQueryBuilder("videos")
         .leftJoin(
@@ -175,15 +172,14 @@ const schedule: CommandData = {
           "discordUserSubs",
           "hostStreamers.id = discordUserSubs.streamer_id OR participantStreamers.id = discordUserSubs.streamer_id"
         )
-        .leftJoin(DiscordUser, "discordUser", "discordUser.id = discordUserSubs.discord_user_id")
         // same result as eagerly loading foreign key tables
         .leftJoinAndSelect("videos.participantStreamers", "ps")
         .leftJoinAndSelect("videos.hostStreamer", "hs")
         .where("videos.scheduledTime > :date", { date: new Date() })
         .andWhere("videos.scheduledTime < :tenDaysAhead", { tenDaysAhead: getDateTenDaysAhead() })
-        .andWhere("discordUser.id = :discordUserId", { discordUserId })
+        .andWhere("discordUserSubs.discord_user_id = :discordUserId", { discordUserId })
+        .andWhere("discordUserSubs.discord_channel_id = :discordChannelId", { discordChannelId })
         .orderBy("videos.scheduledTime", "ASC")
-        .take(25)
         .getMany();
 
       await embedScheduleFormatter(videos, interaction);

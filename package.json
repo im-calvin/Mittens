@@ -35,6 +35,7 @@
     "kuroshiro": "~1.1.2",
     "kuroshiro-analyzer-kuromoji": "^1.1.0",
     "node-schedule": "^2.1.1",
+    "pagination.djs": "^4.0.10",
     "reflect-metadata": "^0.1.13",
     "sqlite3": "^5.1.6",
     "toad-scheduler": "^2.2.0",
