@@ -28,9 +28,11 @@ export async function announceStream(
     op: "announceStream",
     name: "Announces a stream to a channel",
   });
-  const channel = client.channels.cache.get(channel_id);
+  const channel = await client.channels.fetch(channel_id);
   if (!(channel instanceof TextChannel)) {
-    throw new Error();
+    throw new Error(
+      `Channel id of ${channel} not found. Either the client is missing access or channel id is unknown.`
+    ); //
   }
 
   // formatted as documented here: https://old.discordjs.dev/#/docs/discord.js/14.10.2/typedef/TimestampStylesString
