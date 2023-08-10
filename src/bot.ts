@@ -94,6 +94,10 @@ client.on(Events.MessageCreate, async (message: Message) => {
   )
     return;
 
+  if (message.mentions.has(client.user!)) {
+    await message.channel.send("meow");
+  }
+
   // check for CMD_PREFIX (used for $kana)
   if (message.content.startsWith(CMD_PREFIX)) {
     const cmd = message.content.substring(1);
