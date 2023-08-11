@@ -14,7 +14,7 @@ const command = new SlashCommandBuilder()
   .setName("schedule")
   .setDescription("Lists the upcoming streams for the given channel(s)");
 
-command.addSubcommand((subCommand) => {
+command.addSubcommand((subCommand) =>
   subCommand
     .setName("language")
     .setDescription("The org + language to find upcoming streams for")
@@ -24,12 +24,11 @@ command.addSubcommand((subCommand) => {
         .setDescription("The org + language to find upcoming streams for")
         .setAutocomplete(true)
         .setRequired(true)
-    );
-  return subCommand;
-});
+    )
+);
 
-command.addSubcommand((subCommand) => {
-  return subCommand
+command.addSubcommand((subCommand) =>
+  subCommand
     .setName("streamer")
     .setDescription("The streamer to find the upcoming streams for")
     .addStringOption((option) =>
@@ -38,11 +37,11 @@ command.addSubcommand((subCommand) => {
         .setDescription("The streamer to find the upcoming streams for")
         .setAutocomplete(true)
         .setRequired(true)
-    );
-});
+    )
+);
 
-command.addSubcommand((subCommand) => {
-  return subCommand
+command.addSubcommand((subCommand) =>
+  subCommand
     .setName("group")
     .setDescription("The group to find the upcoming streams for")
     .addStringOption((option) =>
@@ -51,8 +50,8 @@ command.addSubcommand((subCommand) => {
         .setDescription("The group to find the upcoming streams for")
         .setAutocomplete(true)
         .setRequired(true)
-    );
-});
+    )
+);
 
 command.addSubcommand((subCommand) =>
   subCommand
