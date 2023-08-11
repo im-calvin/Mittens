@@ -7,7 +7,7 @@ import { embedScheduleFormatter } from "../utils/Message.js";
 import { Brackets, LessThan, MoreThan } from "typeorm";
 import { getDate7DaysBehind, getDateTenDaysAhead } from "../constants.js";
 import { Group } from "../db/entity/Group.js";
-import { DiscordUserSubscription } from "src/db/entity/DiscordUserSubscription.js";
+import { DiscordUserSubscription } from "../db/entity/DiscordUserSubscription.js";
 
 const command = new SlashCommandBuilder()
   .setName("history")
