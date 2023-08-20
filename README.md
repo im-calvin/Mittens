@@ -58,4 +58,4 @@ The database uses SQLite with TypeORM. Notes on the tables:
 
 ## CI/CD
 
-![CI/CD Pipeline](/static/CI_CD.jpg)
+![CI/CD Pipeline](/static/Mittens_CI_CD.png)
