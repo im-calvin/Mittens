@@ -19,7 +19,7 @@ interface DetectedLanguage {
  * @param text the text to translate
  * @returns the translated text in the target language
  */
-async function translateText(text: string, language: string): Promise<string> {
+export async function translateText(text: string, language: string): Promise<string> {
   const transaction = Sentry.startTransaction({
     op: "translateText",
     name: "Translate text interaction",
