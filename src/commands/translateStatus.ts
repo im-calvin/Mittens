@@ -1,9 +1,9 @@
 import { SlashCommandBuilder, PermissionFlagsBits, bold } from "discord.js";
 import { CommandData } from "../utils/cmdLoader.js";
 import { AppDataSource } from "../db/data-source.js";
-import { GuildTranslate } from "../db/entity/GuildTranslate.js";
+import { GuildInfo } from "../db/entity/GuildInfo.js";
 
-const guildTranslateRepo = AppDataSource.getRepository(GuildTranslate);
+const guildTranslateRepo = AppDataSource.getRepository(GuildInfo);
 
 const command = new SlashCommandBuilder()
   .setName("translate-status")

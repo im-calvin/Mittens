@@ -14,10 +14,9 @@ import { ClearNonUniqueSubs1684426659702 } from "./migration/1684426659702-Clear
 import { StreamersLanguages1685251838704 } from "./migration/1685251838704-StreamersLanguages.js";
 import { AddLivePinged1688194621864 } from "./migration/1688194621864-AddLivePinged.js";
 import { AddTranslateStatuses1688860131193 } from "./migration/1688860131193-AddTranslateStatuses.js";
-import { GuildTranslate } from "./entity/GuildTranslate.js";
+import { GuildInfo } from "./entity/GuildInfo.js";
 import { AddHoloEnAdvent1690521022694 } from "./migration/1690521022694-AddHoloEnAdvent.js";
 import { NormalizeLanguages1690528636089 } from "./migration/1690528636089-NormalizeLanguages.js";
-
 
 export const AppDataSource = new DataSource({
   type: "sqlite",
@@ -32,7 +31,7 @@ export const AppDataSource = new DataSource({
     DiscordUserSubscription,
     VideoParticipant,
     Language,
-    GuildTranslate,
+    GuildInfo,
   ],
   migrations: [
     InitMigration,

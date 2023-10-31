@@ -6,7 +6,7 @@ import { readEnv } from "./utils/env.js";
 import { init, kuroshiro } from "./init.js";
 import { scrape } from "./utils/schedule.js";
 import { AppDataSource } from "./db/data-source.js";
-import { GuildTranslate } from "./db/entity/GuildTranslate.js";
+import { GuildInfo } from "./db/entity/GuildInfo.js";
 import { CMD_PREFIX } from "./constants.js";
 
 // need to first init the client because some migrations in init() depend on client being up
@@ -25,7 +25,7 @@ const boot = Sentry.startTransaction({
   name: "First time launch of Mittens",
 });
 
-const guildTranslateRepo = AppDataSource.getRepository(GuildTranslate);
+const guildInfoRepo = AppDataSource.getRepository(GuildInfo);
 
 // on boot
 client.once("ready", async () => {
@@ -93,10 +93,10 @@ client.on(Events.MessageCreate, async (message: Message) => {
   }
   // if the admins turned off translating in their server
   // the database should always have a guild in it because the db gets updated every time mittens joins a guild
-  const guildTranslate = await guildTranslateRepo.findOneByOrFail({
+  const guildInfo = await guildInfoRepo.findOneByOrFail({
     discordGuildId: message.guildId,
   });
-  if (!guildTranslate.status) {
+  if (!guildInfo.status) {
     return;
   }
 
@@ -113,7 +113,7 @@ client.on(Events.MessageCreate, async (message: Message) => {
   }
 
   // check for CMD_PREFIX (used for $kana)
-  if (message.content.startsWith(CMD_PREFIX)) {
+  if (message.content.startsWith(guildInfo.prefix)) {
     const cmd = message.content.substring(1);
     switch (cmd) {
       case "kana":
@@ -152,7 +152,6 @@ client.on(
     oldMessage: Message<boolean> | PartialMessage,
     newMessage: Message<boolean> | PartialMessage
   ) => {
-
     if (oldMessage.partial || newMessage.partial) {
       return; // partials are not enabled
     }
@@ -181,11 +180,11 @@ client.on(Events.GuildCreate, (guild) => {
     op: "guildCreate",
     name: "Mittens added to a new guild",
   });
-  const guildTranslate = new GuildTranslate();
+  const guildTranslate = new GuildInfo();
   guildTranslate.status = false;
   guildTranslate.discordGuildId = guild.id;
 
-  guildTranslateRepo.insert(guildTranslate);
+  guildInfoRepo.insert(guildTranslate);
   transaction.finish();
 });
 
