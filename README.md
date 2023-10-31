@@ -2,11 +2,12 @@
 [![fork with dotenv-vault](https://badge.dotenv.org/fork.svg?r=1)](https://vault.dotenv.org/project/vlt_a88b4b86e3be377976336d5bc2d9f508d0792bbfd9cce02ce5af9879e452e3ca/example)
 [![Docker](https://github.com/im-calvin/Mittens/actions/workflows/docker.yml/badge.svg)](https://github.com/im-calvin/Mittens/actions/workflows/docker.yml)
 
-[Add Mittens here!](https://discord.com/api/oauth2/authorize?client_id=631663182397702146&permissions=414464715840&scope=bot)
+[Add Mittens here!](https://top.gg/bot/631663182397702146)
+
 
 If you have an issue or a feature request feel free to reach out to `calv.` on Discord.
 
-This is version 2 of Mittens boasting a 200% speed increase over [version 1 of Mittens](https://github.com/im-calvin/mittens_bot_v1)
+This is version 2 of Mittens boasting a 200% speed increase over [version 1 of Mittens](https://github.com/im-calvin/mittens_bot_v1) through the use of a proper SQL database and a lot of code optimizations.
 
 ## What does Mittens do?
 
@@ -58,4 +59,4 @@ The database uses SQLite with TypeORM. Notes on the tables:
 
 ## CI/CD
 
-![CI/CD Pipeline](/static/CI_CD.jpg)
+![CI/CD Pipeline](/static/Mittens_CI_CD.png)

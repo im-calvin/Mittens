@@ -10,6 +10,7 @@ import {
 import { Video } from "../db/entity/Video.js";
 import Sentry from "@sentry/node";
 import { client } from "../bot.js";
+import { Pagination } from "pagination.djs";
 
 /**
  * a formatter to send messages over discord
@@ -27,9 +28,11 @@ export async function announceStream(
     op: "announceStream",
     name: "Announces a stream to a channel",
   });
-  const channel = client.channels.cache.get(channel_id);
+  const channel = await client.channels.fetch(channel_id);
   if (!(channel instanceof TextChannel)) {
-    throw new Error();
+    throw new Error(
+      `Channel id of ${channel} not found. Either the client is missing access or channel id is unknown.`
+    ); //
   }
 
   // formatted as documented here: https://old.discordjs.dev/#/docs/discord.js/14.10.2/typedef/TimestampStylesString
@@ -57,18 +60,20 @@ export async function embedScheduleFormatter(
   videos: Video[],
   interaction: ChatInputCommandInteraction
 ) {
+  // @ts-ignore reference: https://github.com/imranbarbhuiya/pagination.djs/issues/177
+  const pagination = new Pagination(interaction);
+
   const embedFields = videos.map((video) => ({
     name: `${time(video.scheduledTime, "f")} / ${time(video.scheduledTime, "R")}`,
     value: `${inlineCode(video.hostStreamer.name)}: ${hyperlink(video.title, video.id)}`,
   }));
 
-  const embed = new EmbedBuilder()
-    .setColor(0xfcc174)
-    .setTitle("Schedule")
-    .addFields(embedFields.slice(0, 25))
-    .setTimestamp();
-
-  await interaction.editReply({ embeds: [embed] });
+  pagination.setColor(0xfcc174);
+  pagination.setTitle("Schedule");
+  pagination.setFields(embedFields);
+  pagination.paginateFields(true);
+  // From docs: By default render() will reply() to the interaction. But if the interaction is already replied or deferred then it'll editReply() instead
+  pagination.render();
 }
 export interface DataField {
   name: string;
