@@ -5,7 +5,18 @@ import Sentry from "@sentry/node";
 import { readEnv } from "./utils/env.js";
 import { init, kuroshiro } from "./init.js";
 import { scrape } from "./utils/schedule.js";
+import { AppDataSource } from "./db/data-source.js";
+import { GuildTranslate } from "./db/entity/GuildTranslate.js";
 import { CMD_PREFIX } from "./constants.js";
+
+// need to first init the client because some migrations in init() depend on client being up
+export const client = new MittensClient({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMessages,
+  ],
+});
 
 await init();
 
@@ -14,13 +25,7 @@ const boot = Sentry.startTransaction({
   name: "First time launch of Mittens",
 });
 
-export const client = new MittensClient({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildMessages,
-  ],
-});
+const guildTranslateRepo = AppDataSource.getRepository(GuildTranslate);
 
 // on boot
 client.once("ready", async () => {
@@ -82,10 +87,19 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
 // handle translating
 client.on(Events.MessageCreate, async (message: Message) => {
-  const transaction = Sentry.startTransaction({
-    op: "msgCreate",
-    name: "Message creation interaction",
+  // if dm
+  if (!message.guildId) {
+    return;
+  }
+  // if the admins turned off translating in their server
+  // the database should always have a guild in it because the db gets updated every time mittens joins a guild
+  const guildTranslate = await guildTranslateRepo.findOneByOrFail({
+    discordGuildId: message.guildId,
   });
+  if (!guildTranslate.status) {
+    return;
+  }
+
   if (
     message.author.id === client.user!.id ||
     message.author.bot ||
@@ -129,7 +143,6 @@ client.on(Events.MessageCreate, async (message: Message) => {
     const myMessage = await message.channel.send(translatedText);
     client.messageCache.set(message.id, myMessage.id);
   }
-  transaction.finish();
 });
 
 // handle translating edits
@@ -139,10 +152,6 @@ client.on(
     oldMessage: Message<boolean> | PartialMessage,
     newMessage: Message<boolean> | PartialMessage
   ) => {
-    const transaction = Sentry.startTransaction({
-      op: "msgUpdate",
-      name: "Message update interaction",
-    });
 
     if (oldMessage.partial || newMessage.partial) {
       return; // partials are not enabled
@@ -162,9 +171,22 @@ client.on(
         // fetch the old message that I sent and edit it
         (await oldMessage.channel.messages.fetch(myOldMessageId)).edit(translatedText);
     }
-    transaction.finish();
   }
 );
 
-client.login(readEnv("DISCORD_TOKEN"));
+// handle joining a guild (for toggling translate)
+// set default for translation to be false
+client.on(Events.GuildCreate, (guild) => {
+  const transaction = Sentry.startTransaction({
+    op: "guildCreate",
+    name: "Mittens added to a new guild",
+  });
+  const guildTranslate = new GuildTranslate();
+  guildTranslate.status = false;
+  guildTranslate.discordGuildId = guild.id;
+
+  guildTranslateRepo.insert(guildTranslate);
+  transaction.finish();
+});
+
 boot.finish();
