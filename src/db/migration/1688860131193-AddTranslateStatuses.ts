@@ -1,4 +1,5 @@
 import { MigrationInterface, QueryRunner, Table } from "typeorm";
+import { client } from "../../bot.js";
 
 export class AddTranslateStatuses1688860131193 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -19,19 +20,12 @@ export class AddTranslateStatuses1688860131193 implements MigrationInterface {
       })
     );
 
-    // insert uuuu server
-    await queryRunner.query(
-      `INSERT INTO guild_translate_statuses (discord_guild_id, status) VALUES ('1009337796357533766', 0)`
-    );
-    // insert emojizone
-    await queryRunner.query(
-      `INSERT INTO guild_translate_statuses (discord_guild_id, status) VALUES ('445609667431759872', 1)`
-    );
-
-    // insert squirty cream
-    await queryRunner.query(
-      `INSERT INTO guild_translate_statuses (discord_guild_id, status) VALUES ('886825927902892042', 0)`
-    );
+    // insert curr servers
+    const guildsInsertStmt = `INSERT INTO guild_translate_statuses (discord_guild_id, status) VALUES (?, ?)`;
+    const guilds = await client.guilds.fetch();
+    guilds.forEach(async (server) => {
+      await queryRunner.query(guildsInsertStmt, [server.id, false]);
+    });
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

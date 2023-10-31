@@ -9,6 +9,15 @@ import { AppDataSource } from "./db/data-source.js";
 import { GuildTranslate } from "./db/entity/GuildTranslate.js";
 import { CMD_PREFIX } from "./constants.js";
 
+// need to first init the client because some migrations in init() depend on client being up
+export const client = new MittensClient({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMessages,
+  ],
+});
+
 await init();
 
 const boot = Sentry.startTransaction({
@@ -17,14 +26,6 @@ const boot = Sentry.startTransaction({
 });
 
 const guildTranslateRepo = AppDataSource.getRepository(GuildTranslate);
-
-export const client = new MittensClient({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildMessages,
-  ],
-});
 
 // on boot
 client.once("ready", async () => {
@@ -99,10 +100,6 @@ client.on(Events.MessageCreate, async (message: Message) => {
     return;
   }
 
-  const transaction = Sentry.startTransaction({
-    op: "msgCreate",
-    name: "Message creation interaction",
-  });
   if (
     message.author.id === client.user!.id ||
     message.author.bot ||
@@ -142,7 +139,6 @@ client.on(Events.MessageCreate, async (message: Message) => {
     const myMessage = await message.channel.send(translatedText);
     client.messageCache.set(message.id, myMessage.id);
   }
-  transaction.finish();
 });
 
 // handle translating edits
@@ -152,10 +148,6 @@ client.on(
     oldMessage: Message<boolean> | PartialMessage,
     newMessage: Message<boolean> | PartialMessage
   ) => {
-    const transaction = Sentry.startTransaction({
-      op: "msgUpdate",
-      name: "Message update interaction",
-    });
 
     if (oldMessage.partial || newMessage.partial) {
       return; // partials are not enabled
@@ -175,7 +167,6 @@ client.on(
         // fetch the old message that I sent and edit it
         (await oldMessage.channel.messages.fetch(myOldMessageId)).edit(translatedText);
     }
-    transaction.finish();
   }
 );
 
@@ -194,5 +185,4 @@ client.on(Events.GuildCreate, (guild) => {
   transaction.finish();
 });
 
-client.login(readEnv("DISCORD_TOKEN"));
 boot.finish();
