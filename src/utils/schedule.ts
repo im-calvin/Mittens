@@ -156,7 +156,7 @@ export async function scrape() {
     }
   });
 
-  const job = new SimpleIntervalJob({ minutes: intervalTime, runImmediately: false }, task);
+  const job = new SimpleIntervalJob({ minutes: intervalTime, runImmediately: true }, task);
 
   scheduler.addSimpleIntervalJob(job);
   transaction.finish();
