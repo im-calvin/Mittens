@@ -3,7 +3,7 @@ import MittensClient from "./utils/Client.js";
 import { handleTranslate } from "./translate/Translate.js";
 import Sentry from "@sentry/node";
 import { readEnv } from "./utils/env.js";
-import { init, kuroshiro } from "./init.js";
+import { dbInit, monitoringInit, kuroshiro } from "./init.js";
 import { scrape } from "./utils/schedule.js";
 import { AppDataSource } from "./db/data-source.js";
 import { GuildTranslate } from "./db/entity/GuildTranslate.js";
@@ -18,7 +18,7 @@ export const client = new MittensClient({
   ],
 });
 
-await init();
+await monitoringInit();
 
 const boot = Sentry.startTransaction({
   op: "boot",
@@ -29,6 +29,7 @@ const guildTranslateRepo = AppDataSource.getRepository(GuildTranslate);
 
 // on boot
 client.once("ready", async () => {
+  await dbInit();
   await scrape();
   console.log("もしもし");
 });
@@ -152,7 +153,6 @@ client.on(
     oldMessage: Message<boolean> | PartialMessage,
     newMessage: Message<boolean> | PartialMessage
   ) => {
-
     if (oldMessage.partial || newMessage.partial) {
       return; // partials are not enabled
     }
@@ -189,4 +189,5 @@ client.on(Events.GuildCreate, (guild) => {
   transaction.finish();
 });
 
+client.login(readEnv("DISCORD_TOKEN"));
 boot.finish();
