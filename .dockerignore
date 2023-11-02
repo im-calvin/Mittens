@@ -4,3 +4,5 @@ node_modules
 data
 .env
 .env.me
+GOOGLE_APPLICATION_CREDENTIALS.json
+googleOAuth2.json

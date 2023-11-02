@@ -11,8 +11,7 @@ import { client } from "./bot.js";
 
 export const kuroshiro = new Kuroshiro();
 
-export async function init(): Promise<void> {
-  client.login(readEnv("DISCORD_TOKEN"));
+export async function monitoringInit(): Promise<void> {
   // inits Sentry
   Sentry.init({
     dsn: "https://c9c992d5a347411db99537a0ed2c0094@o4505106964742144.ingest.sentry.io/4505106967691264",
@@ -25,6 +24,11 @@ export async function init(): Promise<void> {
     profilesSampleRate: 1.0,
     release: "mittens@" + readEnv("npm_package_version"),
   });
+
+  await kuroshiro.init(new KuromojiAnalyzer());
+}
+
+export async function dbInit(): Promise<void> {
   // start the db & run migrations
   await AppDataSource.initialize();
   await AppDataSource.runMigrations();
@@ -37,5 +41,4 @@ export async function init(): Promise<void> {
   for (const video of videos) {
     scheduleAnnounce(video.scheduledTime, video, true);
   }
-  await kuroshiro.init(new KuromojiAnalyzer());
 }

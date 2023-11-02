@@ -4,6 +4,6 @@ services:
     image: imcalvin/mittens:latest
     restart: always
     volumes:
-      - /nfs/mittens/data:/app/data
+      - /nfsdocker/nfs/mittens/data:/app/data
     environment:
       DOTENV_KEY: ${DOTENV_KEY}
