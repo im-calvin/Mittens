@@ -16,7 +16,6 @@ const scheduler = new ToadScheduler();
 const videoRepo = AppDataSource.getRepository(Video);
 const subRepo = AppDataSource.getRepository(DiscordUserSubscription);
 const streamerRepo = AppDataSource.getRepository(Streamer);
-const participantRepo = AppDataSource.getRepository(VideoParticipant);
 
 /**
  * schedules a job to message users on discord about a particular video
@@ -157,7 +156,7 @@ export async function scrape() {
     }
   });
 
-  const job = new SimpleIntervalJob({ minutes: intervalTime, runImmediately: false }, task);
+  const job = new SimpleIntervalJob({ minutes: intervalTime, runImmediately: true }, task);
 
   scheduler.addSimpleIntervalJob(job);
   transaction.finish();

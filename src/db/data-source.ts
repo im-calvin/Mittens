@@ -13,8 +13,11 @@ import { UniqueIndexSubs1684569492134 } from "./migration/1684569492134-UniqueIn
 import { ClearNonUniqueSubs1684426659702 } from "./migration/1684426659702-ClearNonUniqueSubs.js";
 import { StreamersLanguages1685251838704 } from "./migration/1685251838704-StreamersLanguages.js";
 import { AddLivePinged1688194621864 } from "./migration/1688194621864-AddLivePinged.js";
+import { AddTranslateStatuses1688860131193 } from "./migration/1688860131193-AddTranslateStatuses.js";
+import { GuildTranslate } from "./entity/GuildTranslate.js";
 import { AddHoloEnAdvent1690521022694 } from "./migration/1690521022694-AddHoloEnAdvent.js";
 import { NormalizeLanguages1690528636089 } from "./migration/1690528636089-NormalizeLanguages.js";
+
 
 export const AppDataSource = new DataSource({
   type: "sqlite",
@@ -29,6 +32,7 @@ export const AppDataSource = new DataSource({
     DiscordUserSubscription,
     VideoParticipant,
     Language,
+    GuildTranslate,
   ],
   migrations: [
     InitMigration,
@@ -39,6 +43,7 @@ export const AppDataSource = new DataSource({
     AddLivePinged1688194621864,
     AddHoloEnAdvent1690521022694,
     NormalizeLanguages1690528636089,
+    AddTranslateStatuses1688860131193,
   ],
   subscribers: [],
   migrationsTransactionMode: "all",
