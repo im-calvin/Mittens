@@ -189,5 +189,38 @@ client.on(Events.GuildCreate, (guild) => {
   transaction.finish();
 });
 
+// randomly ping certain users to troll them in a particular channel
+const trollUsers = [
+  "218854936539037697", // kevin
+  // "277242405684641794", // derk
+  "554202008882511872", // izzy
+  "254235152341925888", // lsr
+  "513809942193504285", // mru
+  // tyler
+  "1028960477105094676",
+  "986154026934612020",
+  "846494660707876925",
+  "1214765385203585044",
+  "474445191265386496",
+  "955288193425604649",
+];
+const interval = Math.floor(Math.random() * (24 - 1 + 1) + 1) * 60 * 60 * 1000; // random interval between 1 and 24 hours in milliseconds
+const channelId = "1213400628739579924";
+const guildId = "1099897092366942300";
+
+setInterval(() => {
+  const randomUser = trollUsers[Math.floor(Math.random() * trollUsers.length)];
+  const guild = client.guilds.cache.get(guildId);
+  if (guild) {
+    const channel = guild.channels.cache.get(channelId);
+    if (channel && channel.isTextBased()) {
+      const member = guild.members.cache.find((member) => member.user.id === randomUser);
+      if (member) {
+        channel.send(`Wished by ${userMention(member.user.id)}`);
+      }
+    }
+  }
+}, interval);
+
 client.login(readEnv("DISCORD_TOKEN"));
 boot.finish();
