@@ -1,4 +1,4 @@
-import { GatewayIntentBits, Events, Message, PartialMessage } from "discord.js";
+import { GatewayIntentBits, Events, Message, PartialMessage, userMention } from "discord.js";
 import MittensClient from "./utils/Client.js";
 import { handleTranslate } from "./translate/Translate.js";
 import Sentry from "@sentry/node";
@@ -59,7 +59,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     console.error(`Error executing ${interaction.commandName}`);
     console.error(error);
   }
-  transaction.finish();
+  transaction.end();
 });
 
 // handle autocomplete
@@ -83,7 +83,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     console.error(`Error executing ${interaction.commandName}`);
     console.error(error);
   }
-  transaction.finish();
+  transaction.end();
 });
 
 // handle translating
@@ -223,4 +223,4 @@ setInterval(() => {
 }, interval);
 
 client.login(readEnv("DISCORD_TOKEN"));
-boot.finish();
+boot.end();
