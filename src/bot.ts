@@ -1,4 +1,4 @@
-import { GatewayIntentBits, Events, Message, PartialMessage } from "discord.js";
+import { GatewayIntentBits, Events, Message, PartialMessage, userMention } from "discord.js";
 import MittensClient from "./utils/Client.js";
 import { handleTranslate } from "./translate/Translate.js";
 import Sentry from "@sentry/node";
@@ -59,7 +59,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     console.error(`Error executing ${interaction.commandName}`);
     console.error(error);
   }
-  transaction.finish();
+  transaction.end();
 });
 
 // handle autocomplete
@@ -83,7 +83,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     console.error(`Error executing ${interaction.commandName}`);
     console.error(error);
   }
-  transaction.finish();
+  transaction.end();
 });
 
 // handle translating
@@ -186,8 +186,33 @@ client.on(Events.GuildCreate, (guild) => {
   guildTranslate.discordGuildId = guild.id;
 
   guildTranslateRepo.insert(guildTranslate);
-  transaction.finish();
+  transaction.end();
 });
 
+// randomly ping certain users to troll them in a particular channel
+const trollUsers = [
+  "218854936539037697", // kevin
+  // "277242405684641794", // derk
+  "554202008882511872", // izzy
+  "254235152341925888", // lsr
+];
+const interval = 12 * 60 * 60 * 1000; // half a day in milliseconds
+const channelId = "1213400628739579924";
+const guildId = "1099897092366942300";
+
+setInterval(() => {
+  const randomUser = trollUsers[Math.floor(Math.random() * trollUsers.length)];
+  const guild = client.guilds.cache.get(guildId);
+  if (guild) {
+    const channel = guild.channels.cache.get(channelId);
+    if (channel && channel.isTextBased()) {
+      const member = guild.members.cache.find((member) => member.user.id === randomUser);
+      if (member) {
+        channel.send(`Wished by ${userMention(member.user.id)}`);
+      }
+    }
+  }
+}, interval);
+
 client.login(readEnv("DISCORD_TOKEN"));
-boot.finish();
+boot.end();

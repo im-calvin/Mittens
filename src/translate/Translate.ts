@@ -36,7 +36,7 @@ async function translateText(text: string, language: string): Promise<string> {
     throw new Error("No translation found");
   }
   const translatedText = translations.map((t) => t.translatedText).join("\n");
-  transaction.finish();
+  transaction.end();
   return translatedText;
 }
 
@@ -46,7 +46,6 @@ async function translateText(text: string, language: string): Promise<string> {
  * @returns true if the text is detected as the target language
  */
 async function detectLanguage(text: string): Promise<DetectedLanguage> {
-  
   const transaction = Sentry.startTransaction({
     op: "detectLanguage",
     name: "Detects the language of the text",
@@ -69,7 +68,7 @@ async function detectLanguage(text: string): Promise<DetectedLanguage> {
   )
     throw new Error("No detected language found");
 
-  transaction.finish();
+  transaction.end();
   return {
     confidence:
       language.confidence > targetConfidence && targetLanguages.includes(language.languageCode),

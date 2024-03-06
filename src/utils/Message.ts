@@ -53,7 +53,7 @@ export async function announceStream(
     ${video.id}
     ${mentions}
   `);
-  transaction.finish();
+  transaction.end();
 }
 
 export async function embedScheduleFormatter(
