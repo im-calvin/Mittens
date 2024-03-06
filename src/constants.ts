@@ -21,7 +21,7 @@ export async function getDBStreamers(): Promise<Streamer[]> {
     throw new Error("Streamer table is empty");
   }
 
-  transaction.finish();
+  transaction.end();
   return streamers;
 }
 
@@ -32,7 +32,7 @@ export async function getGroups(): Promise<Group[]> {
   });
   const groups = await AppDataSource.getRepository(Group).find();
 
-  transaction.finish();
+  transaction.end();
   return groups;
 }
 
@@ -48,7 +48,7 @@ export async function getStreamersByLanguage(language: Language): Promise<Stream
     .leftJoin(Language, "languages", "groups.language_id = :language", { language: language.id })
     .getMany();
 
-  transaction.finish();
+  transaction.end();
   return streamers;
 }
 
@@ -60,7 +60,7 @@ export async function getLanguages(): Promise<Language[]> {
 
   const languages = await AppDataSource.getRepository(Language).find();
 
-  transaction.finish();
+  transaction.end();
   return languages;
 }
 

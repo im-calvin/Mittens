@@ -70,6 +70,6 @@ export async function getHoloChannels(): Promise<HolodexChannel[]> {
     offset += 25;
   } while (data.length !== 0);
 
-  transaction.finish();
+  transaction.end();
   return res;
 }

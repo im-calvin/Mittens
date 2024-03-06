@@ -159,7 +159,7 @@ export async function scrape() {
   const job = new SimpleIntervalJob({ minutes: intervalTime, runImmediately: true }, task);
 
   scheduler.addSimpleIntervalJob(job);
-  transaction.finish();
+  transaction.end();
 }
 
 /**
@@ -194,7 +194,7 @@ async function getChannelSubs(video: Video): Promise<Map<string, string[]>> {
       channelSubs.set(sub.discordChannelId, [...channelUsers, sub.discordUser.id]);
     }
   }
-  transaction.finish();
+  transaction.end();
 
   return channelSubs;
 }
