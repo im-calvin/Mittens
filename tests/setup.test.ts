@@ -1,6 +1,9 @@
-import { scheduleAnnounce } from "src/utils/schedule.js";
-import { describe, test } from "node:test";
+import { translateText } from "../src/translate/Translate.js";
+import { expect, test, jest, describe } from "@jest/globals";
 
-describe("Schedule smoke test", () => {
-  test("schedule job", () => {});
+describe("Test translate", () => {
+  test("おはよう - good morning", async () => {
+    const translatedText = await translateText("おはよう", "en");
+    expect(translatedText).toBe("good morning");
+  });
 });
